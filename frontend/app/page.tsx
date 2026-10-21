@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api, post, Invoice, money, feeLabel } from "@/lib/api";
 import { Badge, Kpi, PageHead, DemoPanel, STATUS_LABEL, AiRationale } from "@/components/ui";
+import { Icon, IconTile } from "@/components/icons";
 import { AgGridReact, amountFmt, COUNTRY } from "@/components/grid";
 
 const OPEN = ["sent", "due_soon", "due", "overdue_3", "overdue_7"];
@@ -28,7 +29,7 @@ export default function InvoicesPage() {
   const waitNotes = visibleRems.filter(r => r.status === "no_action");
   const letters = visibleRems.filter(r => r.status !== "no_action");
   const cols = useMemo(() => [
-    { field: "number", headerName: "Invoice", width: 172, minWidth: 172, cellRenderer: (p: any) => <b>{p.value}</b> },
+    { field: "number", headerName: "Invoice", width: 210, minWidth: 210, cellRenderer: (p: any) => <span className="cell-lead"><IconTile n="invoices" size={13} />{p.value}</span> },
     { field: "client", headerName: "Client", flex: 1, minWidth: 150, wrapText: true, autoHeight: true,
       cellRenderer: (p: any) => <span>{p.value} <span className="cell-sub">{COUNTRY[p.data.country] || p.data.country}</span></span> },
     { field: "amount", headerName: "Amount", width: 130, type: "rightAligned", cellRenderer: (p: any) => <span><span className="cell-sub">{p.data.currency}</span> {amountFmt(p)}</span> },
@@ -37,26 +38,26 @@ export default function InvoicesPage() {
     { headerName: "", colId: "actions", width: 168, sortable: false, resizable: false, cellRenderer: (p: any) => {
         const i: Invoice = p.data;
         if (i.status === "draft") return <button className="btn sm" disabled={busy} onClick={() => act(() => post(`/api/invoices/${i.id}/send`), r => `Sent ${r.number} via PayPal`)}>Send via PayPal</button>;
-        if (OPEN.includes(i.status)) return <button className="btn sm ghost" disabled={busy} onClick={() => act(() => post(`/api/invoices/${i.id}/reminders`), r => `AI drafted a ${r.tone} reminder for ${i.number}. You'll find it under Reminder drafts.`)}>✨ Draft reminder</button>;
+        if (OPEN.includes(i.status)) return <button className="btn sm ghost" disabled={busy} onClick={() => act(() => post(`/api/invoices/${i.id}/reminders`), r => `AI drafted a ${r.tone} reminder for ${i.number}. You'll find it under Reminder drafts.`)}><Icon n="ai" size={14} /> Draft reminder</button>;
         return null; } },
   ] as any, [busy]);
 
   return (<>
-    <PageHead title="Invoices" sub="Every PayPal invoice, its status, and AI-drafted payment reminders. You approve every reminder before it goes anywhere."
+    <PageHead icon="invoices" title="Invoices" sub="Every PayPal invoice, its status, and AI-drafted payment reminders. You approve every reminder before it goes anywhere."
       right={<div className="row">
-        <button className="btn ghost" disabled={busy} onClick={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.checked} checked, ${r.paid.length} newly paid, ${r.new_disputes.length} new disputes${r.errors.length ? `, ${r.errors.length} errors` : ""}.`)}>🔄 Sync with PayPal</button>
-        <button className="btn" onClick={() => setShowNew(!showNew)}>{showNew ? "Close" : "+ New invoice"}</button></div>} />
+        <button className="btn ghost" disabled={busy} onClick={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.checked} checked, ${r.paid.length} newly paid, ${r.new_disputes.length} new disputes${r.errors.length ? `, ${r.errors.length} errors` : ""}.`)}><Icon n="sync" /> Sync with PayPal</button>
+        <button className="btn" onClick={() => setShowNew(!showNew)}>{showNew ? <><Icon n="close" /> Close</> : <><Icon n="add" /> New invoice</>}</button></div>} />
 
     {sum && <div className="kpis">
-      <Kpi label="Outstanding" totals={sum.outstanding.totals} foot={`${sum.outstanding.count} of ${invs.length} invoices open`} part={sum.outstanding.count} whole={invs.length} />
-      <Kpi label="Overdue" kind="bad" totals={sum.overdue.totals} foot={`${sum.overdue.count} past due · ${sum.drafts_pending} reminder draft${sum.drafts_pending === 1 ? "" : "s"} waiting`} part={sum.overdue.count} whole={sum.outstanding.count} />
-      <Kpi label="Paid this month" kind="ok" totals={sum.paid_this_month.totals} foot={`${sum.paid_this_month.count} invoice${sum.paid_this_month.count === 1 ? "" : "s"} · ${sum.month}`} part={sum.paid_this_month.count} whole={invs.filter(i => i.status === "paid").length} />
-      <Kpi label="Open disputes" kind="warn" totals={sum.open_disputes.totals} foot={`${sum.open_disputes.count} open · ${sum.open_disputes.awaiting_approval} awaiting approval`} part={sum.open_disputes.awaiting_approval} whole={sum.open_disputes.count} />
+      <Kpi label="Outstanding" icon="wallet" totals={sum.outstanding.totals} foot={`${sum.outstanding.count} of ${invs.length} invoices open`} part={sum.outstanding.count} whole={invs.length} />
+      <Kpi label="Overdue" icon="clock" kind="bad" totals={sum.overdue.totals} foot={`${sum.overdue.count} past due · ${sum.drafts_pending} reminder draft${sum.drafts_pending === 1 ? "" : "s"} waiting`} part={sum.overdue.count} whole={sum.outstanding.count} />
+      <Kpi label="Paid this month" icon="received" kind="ok" totals={sum.paid_this_month.totals} foot={`${sum.paid_this_month.count} invoice${sum.paid_this_month.count === 1 ? "" : "s"} · ${sum.month}`} part={sum.paid_this_month.count} whole={invs.filter(i => i.status === "paid").length} />
+      <Kpi label="Open disputes" icon="disputes" kind="warn" totals={sum.open_disputes.totals} foot={`${sum.open_disputes.count} open · ${sum.open_disputes.awaiting_approval} awaiting approval`} part={sum.open_disputes.awaiting_approval} whole={sum.open_disputes.count} />
     </div>}
 
     {note && <div className={`notice ${note.err ? "err" : ""}`}>{note.t}</div>}
 
-    {showNew && <div className="card"><div className="card-head"><h2>New invoice</h2><span className="muted">Created and sent with the PayPal Invoicing API v2</span></div>
+    {showNew && <div className="card"><div className="card-head"><h2><Icon n="invoices" />New invoice</h2><span className="muted">Created and sent with the PayPal Invoicing API v2</span></div>
       <div className="row" style={{ alignItems: "flex-end" }}>
         <label className="field">Client<select value={form.client_id} onChange={e => setForm({ ...form, client_id: +e.target.value })}>
           {clients.map(c => <option key={c.id} value={c.id}>{c.name} ({c.country})</option>)}</select></label>
@@ -72,7 +73,7 @@ export default function InvoicesPage() {
         {[1, 3, 7].map(d => <button key={d} className="btn ghost sm" disabled={busy} onClick={() => act(() => post("/api/dev/clock/advance", { days: d }), r => `Clock moved to ${r.today}. ${r.changes.length ? r.changes.map((c: any) => `${c.invoice}: ${STATUS_LABEL[c.from]} → ${STATUS_LABEL[c.to]}`).join(" · ") : "No status changes."}`)}>+{d} day{d > 1 ? "s" : ""}</button>)}
         <button className="btn ghost sm" disabled={busy} onClick={() => act(() => post("/api/dev/clock/reset"), r => `Clock reset to ${r.today}.`)}>Reset to today</button></div>
       <div className="group"><span>AI agent</span>
-        <button className="btn sm" disabled={busy} onClick={() => act(() => post("/api/reminders/run"), r => `Chaser agent reviewed open invoices and drafted ${r.drafted.length} reminder(s).`)}>✨ Run chaser on all due/overdue invoices</button></div>
+        <button className="btn sm" disabled={busy} onClick={() => act(() => post("/api/reminders/run"), r => `Chaser agent reviewed open invoices and drafted ${r.drafted.length} reminder(s).`)}><Icon n="ai" size={14} /> Run chaser on all due/overdue invoices</button></div>
       <div className="group"><span>Payment webhook</span>
         <select value={simId} onChange={e => setSimId(+e.target.value)}><option value={0}>Choose an open invoice…</option>
           {openInvs.map(i => <option key={i.id} value={i.id}>{i.number} · {i.client} · {money(i.amount, i.currency)}</option>)}</select>
@@ -80,22 +81,22 @@ export default function InvoicesPage() {
         <span className="muted" style={{ width: "auto" }}>Mock mode only. In sandbox, pay the invoice and use Sync.</span></div>
     </DemoPanel>
 
-    <div className="card"><div className="card-head"><h2>All invoices</h2><span className="muted">{invs.length} total</span></div>
+    <div className="card"><div className="card-head"><h2><Icon n="db" />All invoices</h2><span className="muted">{invs.length} total</span></div>
       <div className="ag-theme-quartz">
         <AgGridReact rowData={invs} columnDefs={cols} domLayout="autoHeight" pagination={invs.length > 10} paginationPageSize={10} paginationPageSizeSelector={[10, 25, 50]}
           defaultColDef={{ sortable: true, resizable: true, suppressHeaderMenuButton: true }} rowHeight={44} getRowId={(p: any) => String(p.data.id)} />
       </div></div>
 
-    <div className="card"><div className="card-head"><h2>Reminder drafts <span className="muted">· {rems.filter(r => r.status === "draft").length} waiting for review</span></h2>
+    <div className="card"><div className="card-head"><h2><Icon n="mail" />Reminder drafts <span className="muted">· {rems.filter(r => r.status === "draft").length} waiting for review</span></h2>
       <label className="muted row" style={{ gap: 6 }}><input type="checkbox" checked={showAll} onChange={e => setShowAll(e.target.checked)} />Show cancelled</label></div>
-      {visibleRems.length === 0 ? <div className="empty-inline"><div className="empty-icon">✉️</div>
-        <div><b>No drafts waiting.</b> When an invoice is due or overdue, click <b>✨ Draft reminder</b>. The agent looks at the client's country, how fast they've paid before and the tone of their recent messages, then writes a reminder for you to review. Nothing is sent automatically.</div></div>
+      {visibleRems.length === 0 ? <div className="empty-inline"><IconTile n="mail" big />
+        <div><b>No drafts waiting.</b> When an invoice is due or overdue, click <b><Icon n="ai" size={14} /> Draft reminder</b>. The agent looks at the client's country, how fast they've paid before and the tone of their recent messages, then writes a reminder for you to review. Nothing is sent automatically.</div></div>
       : <>
         {waitNotes.length > 0 && <div className="wait-list"><div className="muted" style={{ marginBottom: 4 }}>No action needed right now ({waitNotes.length})</div>
           {waitNotes.map(r => { const inv = invById[r.invoice_id]; return <div key={r.id} className="wait-row">
             <b>{inv?.number}</b><span className="muted">{inv?.client}</span><Badge s="wait" label="Wait" />
             <span className="wait-why" title={r.reasoning.rationale}>{r.reasoning.rationale}</span>
-            <span className="muted">{r.reasoning.decision_source === "rules" ? "rules" : "✦ " + r.reasoning.decision_source}</span></div>; })}</div>}
+            <span className="muted">{r.reasoning.decision_source === "rules" ? "rules" : "AI · " + r.reasoning.decision_source}</span></div>; })}</div>}
         <div className="drafts-masonry">{letters.map(r => { const inv = invById[r.invoice_id]; const long = r.body.length > 420; const open = expanded[r.id];
           return (
         <div key={r.id} className={`draft ${["draft", "approved"].includes(r.status) ? "" : "dim"}`}>
@@ -109,8 +110,8 @@ export default function InvoicesPage() {
           {r.reasoning.draft_source && <div className="muted" style={{ marginTop: 6 }}>Written by {r.reasoning.draft_source === "template" ? "template (fallback)" : r.reasoning.draft_source}</div>}
           {r.late_fee > 0 && <div className="muted">Optional late fee mentioned: {feeLabel(r, inv?.currency)}</div>}
           {r.status === "draft" && <div className="row" style={{ marginTop: 8 }}>
-            <button className="btn ghost sm" onClick={() => { navigator.clipboard?.writeText(`${r.subject}\n\n${r.body}`); setNote({ t: "Reminder copied. Paste it into your email." }); }}>Copy text</button>
-            <button className="btn success sm" onClick={() => act(() => post(`/api/reminders/${r.id}/approve`), () => "Reminder approved. LedgerGuard never sends it for you.")}>Approve</button></div>}
+            <button className="btn ghost sm" onClick={() => { navigator.clipboard?.writeText(`${r.subject}\n\n${r.body}`); setNote({ t: "Reminder copied. Paste it into your email." }); }}><Icon n="copy" size={14} /> Copy text</button>
+            <button className="btn success sm" onClick={() => act(() => post(`/api/reminders/${r.id}/approve`), () => "Reminder approved. LedgerGuard never sends it for you.")}><Icon n="tick" size={14} /> Approve</button></div>}
         </div>); })}</div></>}
     </div>
   </>);

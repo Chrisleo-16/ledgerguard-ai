@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { api, post, Invoice, money } from "@/lib/api";
 import { Badge, PageHead, DemoPanel } from "@/components/ui";
+import { Icon, IconTile, IcName } from "@/components/icons";
 const REASONS: Record<string, string> = { MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED: "Not as described", MERCHANDISE_OR_SERVICE_NOT_RECEIVED: "Not received", UNAUTHORISED: "Unauthorised" };
-const KIND_ICON: Record<string, string> = { contract: "📄", milestone: "🏁", delivery: "📦", message: "💬", file: "📎" };
+const KIND_ICON: Record<string, IcName> = { contract: "contract", milestone: "milestone", delivery: "delivery", message: "message", file: "file" };
 
 export default function DisputesPage() {
   const [ev, setEv] = useState<any[]>([]); const [activity, setActivity] = useState<any[]>([]);
@@ -23,8 +24,8 @@ export default function DisputesPage() {
   const msIds = new Set((p.milestone_refs || []).map((m: any) => m.evidence_id));
 
   return (<>
-    <PageHead title="Disputes" sub="When a buyer opens a PayPal dispute, LedgerGuard gathers your evidence and drafts a defense package. You review it before anything is submitted."
-      right={<button className="btn ghost" disabled={busy} onClick={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.new_disputes.length} new dispute(s).`)}>🔄 Check PayPal for disputes</button>} />
+    <PageHead icon="disputes" title="Disputes" sub="When a buyer opens a PayPal dispute, LedgerGuard gathers your evidence and drafts a defense package. You review it before anything is submitted."
+      right={<button className="btn ghost" disabled={busy} onClick={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.new_disputes.length} new dispute(s).`)}><Icon n="sync" /> Check PayPal for disputes</button>} />
     {note && <div className={`notice ${note.err ? "err" : ""}`}>{note.t}</div>}
     <DemoPanel hint="simulate a CUSTOMER.DISPUTE.CREATED webhook (mock mode)">
       <div className="group"><span>Open a dispute</span>
@@ -33,7 +34,7 @@ export default function DisputesPage() {
         <button className="btn sm" disabled={busy || !simInv} onClick={() => act(() => post("/api/dev/simulate/dispute", { invoice_id: simInv, reason }), r => `Webhook received: dispute ${r.result.dispute_id} opened. ${r.result.evidence_items} evidence items found and a defense package was drafted.`)}>Simulate dispute webhook</button></div>
     </DemoPanel>
 
-    {ds.length === 0 ? <div className="card empty"><div className="empty-icon">🛡️</div><h2>No disputes. You're in good standing.</h2>
+    {ds.length === 0 ? <div className="card empty"><IconTile n="disputes" big /><h2>No disputes. You're in good standing.</h2>
       <p>If a buyer opens a dispute, LedgerGuard prepares your defense automatically and waits for your sign-off.</p>
       <div className="steps">
         <div className="step"><b><span className="num">1</span>Detect</b><span className="muted">PayPal sends a dispute webhook, or Sync finds the new dispute.</span></div>
@@ -42,7 +43,7 @@ export default function DisputesPage() {
         <div className="step"><b><span className="num">4</span>You approve</b><span className="muted">Evidence goes to PayPal only when you click Approve & submit.</span></div>
       </div><p>Try it: open <b>Demo controls</b> above and simulate a dispute.</p></div>
     : <div className="split" style={{ gridTemplateColumns: "minmax(260px,340px) minmax(0,1fr)" }}>
-      <div className="card"><div className="card-head"><h2>Cases</h2><span className="muted">{ds.length}</span></div><div className="list">
+      <div className="card"><div className="card-head"><h2><Icon n="disputes" />Cases</h2><span className="muted">{ds.length}</span></div><div className="list">
         {ds.map(x => <button key={x.id} className={`list-item ${x.id === selId ? "active" : ""}`} onClick={() => { setSelId(x.id); setConfirming(false); }}>
           <div className="row" style={{ justifyContent: "space-between" }}><b>{x.paypal_dispute_id}</b><Badge s={x.status} /></div>
           <div className="muted">{REASONS[x.reason] || x.reason} · {x.package?.amount?.currency_code} {Number(x.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
@@ -56,21 +57,21 @@ export default function DisputesPage() {
         <div className="split" style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)" }}>
           <div><h3>Evidence timeline</h3><ul className="timeline">{(p.timeline || []).map((t: any) =>
             <li key={t.evidence_id} className={msIds.has(t.evidence_id) ? "ms" : ""}>
-              <div className="row" style={{ gap: 6 }}><span className="muted">{t.date}</span><span className="badge">{KIND_ICON[t.kind] || "•"} {t.kind}</span><span className="muted">#{t.evidence_id}</span></div>
+              <div className="row" style={{ gap: 6 }}><span className="muted">{t.date}</span><span className="badge"><Icon n={KIND_ICON[t.kind] || "file"} size={12} /> {t.kind}</span><span className="muted">#{t.evidence_id}</span></div>
               <div><b>{t.title}</b></div><div className="muted">{t.excerpt}</div>
               {rel[t.evidence_id] && <div className="rel"><span className="rel-bar"><span style={{ width: `${Math.round(rel[t.evidence_id].relevance * 100)}%` }} /></span>
                 <span className="muted">relevance {Math.round(rel[t.evidence_id].relevance * 100)}% · {rel[t.evidence_id].why}</span></div>}</li>)}</ul></div>
           <div>{asmt.ranked && <div className="ai-box" style={{ marginTop: 0 }}>
-              <div className="row" style={{ gap: 6 }}><span className="ai-tag">{asmt.source === "rules" ? "Rules engine" : "✦ AI evidence review"}</span><span className="muted">{asmt.source}</span></div>
+              <div className="row" style={{ gap: 6 }}><span className="ai-tag">{asmt.source === "rules" ? "Rules engine" : <><Icon n="ai" size={12} /> AI evidence review</>}</span><span className="muted">{asmt.source}</span></div>
               {asmt.summary && <div className="ai-text">{asmt.summary}</div>}
-              {asmt.gaps?.length > 0 ? <><div className="guard" style={{ marginTop: 6 }}>⚠ Gaps to fill before submitting:</div>
+              {asmt.gaps?.length > 0 ? <><div className="guard" style={{ marginTop: 6 }}><Icon n="alert" size={13} /> Gaps to fill before submitting:</div>
                 <ul className="gaps">{asmt.gaps.map((g: string, i: number) => <li key={i}>{g}</li>)}</ul></> : <div className="muted">No evidence gaps flagged.</div>}
             </div>}
             <h3>Milestones referenced</h3>{(p.milestone_refs || []).length ? <ul style={{ paddingLeft: 18, margin: 0 }}>{p.milestone_refs.map((m: any) => <li key={m.evidence_id}>{m.date}: {m.title} <span className="muted">#{m.evidence_id}</span></li>)}</ul> : <p className="muted">None found.</p>}
             <h3>Statement to PayPal</h3><div className="letter">{p.statement}</div>
             <div className="muted">Drafted by {p.generated_by} · Evidence type: {p.paypal_evidence_payload?.evidences?.[0]?.evidence_type}</div>
             <div style={{ marginTop: 14 }}>
-              {d.status === "package_ready" && !confirming && <button className="btn success" onClick={() => setConfirming(true)}>✅ Approve & submit evidence</button>}
+              {d.status === "package_ready" && !confirming && <button className="btn success" onClick={() => setConfirming(true)}><Icon n="check" /> Approve & submit evidence</button>}
               {d.status === "package_ready" && confirming && <div className="notice"><b>Submit to PayPal?</b> This calls the provide-evidence API and can't be undone.
                 <div className="row" style={{ marginTop: 8 }}><button className="btn success sm" disabled={busy} onClick={() => act(() => post(`/api/disputes/${d.id}/submit-evidence`), () => "Evidence submitted to PayPal. The case is now under review.")}>Yes, submit</button>
                 <button className="btn ghost sm" onClick={() => setConfirming(false)}>Cancel</button></div></div>}
@@ -78,12 +79,12 @@ export default function DisputesPage() {
             </div></div></div></>}
       </div>}</div>}
     <div className="two-col">
-      <div className="card"><div className="card-head"><h2>Evidence library</h2><span className="muted">What a defense can cite, per client</span></div>
+      <div className="card"><div className="card-head"><h2><Icon n="db" />Evidence library</h2><span className="muted">What a defense can cite, per client</span></div>
         <table className="simple-table"><thead><tr><th>Client</th><th className="num">Contracts</th><th className="num">Milestones</th><th className="num">Deliveries</th><th className="num">Messages</th><th className="num">Files</th></tr></thead>
           <tbody>{ev.map(r => <tr key={r.client_id}><td>{r.client}</td>{["contract", "milestone", "delivery", "message", "file"].map(k => <td key={k} className="num">{r[k] || "—"}</td>)}</tr>)}</tbody></table>
         <p className="muted" style={{ marginBottom: 0 }}>Searched with full-text search (SQLite FTS5 / Postgres) when a dispute arrives.</p></div>
-      <div className="card"><div className="card-head"><h2>Recent PayPal activity</h2><span className="muted">Webhook events received</span></div>
-        {activity.length === 0 ? <div className="empty-inline"><div className="empty-icon">⚡</div><div>No webhook events yet. Payments and disputes from PayPal show up here as they arrive.</div></div>
+      <div className="card"><div className="card-head"><h2><Icon n="flash" />Recent PayPal activity</h2><span className="muted">Webhook events received</span></div>
+        {activity.length === 0 ? <div className="empty-inline"><IconTile n="flash" big /><div>No webhook events yet. Payments and disputes from PayPal show up here as they arrive.</div></div>
         : <ul className="activity">{activity.map(a => <li key={a.id}><span className="when">{new Date(a.received_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
             <span className={`badge ${a.event_type.includes("DISPUTE") ? "b-warn" : "b-ok"}`}>{a.event_type.includes("DISPUTE") ? "Dispute opened" : "Payment received"}</span>
             <span>{a.ref || "—"}</span><span className="muted" style={{ marginLeft: "auto" }}>{a.event_type}</span></li>)}</ul>}</div>

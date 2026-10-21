@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api, post, Invoice } from "@/lib/api";
 import { Badge, PageHead, Thinking } from "@/components/ui";
+import { Icon } from "@/components/icons";
 import { AgGridReact, amountFmt, COUNTRY } from "@/components/grid";
 const EXAMPLES = ["past-due invoices over $1000", "unpaid invoices from Germany", "paid invoices", "overdue more than 5 days", "largest open invoices in USD", "invoices under 1k"];
 export default function LedgerPage() {
@@ -22,11 +23,11 @@ export default function LedgerPage() {
   const reset = async () => { setRes(null); setQ(""); setRows(await api("/api/invoices")); };
   const fmtCond = (c: any) => `${c.field.replace("_", " ")} ${({ eq: "=", neq: "≠", gt: ">", gte: "≥", lt: "<", lte: "≤", in: "in", contains: "contains", between: "between" } as any)[c.op] || c.op} ${Array.isArray(c.value) ? c.value.join(", ") : c.value ?? ""}`;
   return (<>
-    <PageHead title="Ledger" sub="Ask a question in plain English. LedgerGuard turns it into a checked filter, so the AI never writes database queries, and every total is calculated from your data." />
+    <PageHead icon="ledger" title="Ledger" sub="Ask a question in plain English. LedgerGuard turns it into a checked filter, so the AI never writes database queries, and every total is calculated from your data." />
     <div className="card">
-      <form className="askbar" onSubmit={e => { e.preventDefault(); ask(q); }}>
+      <form className="askbar" onSubmit={e => { e.preventDefault(); ask(q); }}><Icon n="search" />
         <input value={q} onChange={e => setQ(e.target.value)} placeholder="Ask your ledger… e.g. past-due invoices over $1000" />
-        <button className="btn" type="submit" disabled={busy}>{busy ? <Thinking /> : "Ask ↵"}</button>
+        <button className="btn" type="submit" disabled={busy}>{busy ? <Thinking /> : <><Icon n="up" size={14} /> Ask</>}</button>
         {res && <button type="button" className="btn ghost" onClick={reset}>Clear</button>}</form>
       <div className="chips" style={{ marginTop: 10 }}>{EXAMPLES.map(x => <button key={x} className="chip" onClick={() => { setQ(x); ask(x); }}>{x}</button>)}</div>
       {err && <div className="notice err" style={{ marginTop: 12 }}>{err}</div>}
@@ -36,7 +37,7 @@ export default function LedgerPage() {
           {res.spec.sort && <span className="badge">sort {res.spec.sort.field} {res.spec.sort.dir}</span>}
           <span className="muted">· parsed by {res.parser}</span></div></div>}
     </div>
-    <div className="card"><div className="card-head"><h2>{res ? "Matching invoices" : "All invoices"}</h2><span className="muted">{rows.length} row{rows.length === 1 ? "" : "s"}</span></div>
+    <div className="card"><div className="card-head"><h2><Icon n="db" />{res ? "Matching invoices" : "All invoices"}</h2><span className="muted">{rows.length} row{rows.length === 1 ? "" : "s"}</span></div>
       <div className="ag-theme-quartz ledger-grid">
         <AgGridReact rowData={rows} columnDefs={cols} domLayout="autoHeight" pagination={rows.length > 15} paginationPageSize={15} paginationPageSizeSelector={[15, 30, 100]}
           defaultColDef={{ sortable: true, resizable: true, suppressHeaderMenuButton: true }} rowHeight={44} />

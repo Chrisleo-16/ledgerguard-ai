@@ -4,9 +4,16 @@
 
 An agentic PayPal copilot for freelancers and cross-border micro-SMEs. It chases late invoices, builds chargeback defenses, and answers "who owes me what?" in plain language. The model proposes; code bounds it; a human approves every step that leaves the app.
 
-Built by Chrisben Evans Leo (Nairobi) for the PayPal AI Hackathon, 2026. Live demo: [DEMO_URL]. Video: [YOUTUBE_URL].
+Built by Chrisben Evans Leo (Nairobi) for the PayPal AI Hackathon, 2026. Built during the hackathon submission period (October 2026). Live demo: https://ledgerguard-web.onrender.com (app at [/app](https://ledgerguard-web.onrender.com/app)). API: https://ledgerguard-api-i7i3.onrender.com. Code: https://github.com/Chrisleo-16/ledgerguard-ai. Video: [YOUTUBE_URL].
 
 ![LedgerGuard AI invoice chaser home screen](docs/readme/screens/home.png)
+
+## Judge access
+
+- Landing: https://ledgerguard-web.onrender.com · Demo app: https://ledgerguard-web.onrender.com/app · API: https://ledgerguard-api-i7i3.onrender.com (OpenAPI docs at `/docs`).
+- No login needed. `/login` is a demo screen; "Continue to demo" opens the app.
+- Both services run on Render's free plan and sleep when idle. The first request can take about a minute while they wake; reload if the app shows "API offline".
+- The demo uses SQLite on an ephemeral disk and re-seeds its demo data on every boot, so changes you make are reset after a restart.
 
 ## Behaviour
 

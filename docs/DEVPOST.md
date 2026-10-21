@@ -5,13 +5,21 @@
 | | |
 |---|---|
 | **Author** | Chrisben Evans Leo, second-year Data Science student and full-stack developer, Nairobi, Kenya |
-| **Live demo** | `[DEMO_URL — placeholder, add before submitting]` |
-| **Source code** | `[GITHUB_URL — placeholder, add before submitting]` |
+| **Live demo** | https://ledgerguard-web.onrender.com (landing) · https://ledgerguard-web.onrender.com/app (demo app) · API https://ledgerguard-api-i7i3.onrender.com |
+| **Source code** | https://github.com/Chrisleo-16/ledgerguard-ai |
 | **Demo video** | `[YOUTUBE_URL — placeholder, add before submitting]` |
-| **AI model** | `[AI_MODEL_NAME — placeholder; set through the LLM_MODEL env var]` |
+| **AI model** | Claude `claude-sonnet-5-5` via the Anthropic Python SDK (`LLM_MODEL` overrides it) |
 | **License** | MIT |
+| **Built** | During the submission period, October 2026 |
 
 ---
+
+## Judge access
+
+- Landing: https://ledgerguard-web.onrender.com · Demo app: https://ledgerguard-web.onrender.com/app · API: https://ledgerguard-api-i7i3.onrender.com (OpenAPI docs at `/docs`).
+- No login needed. `/login` is a demo screen; "Continue to demo" opens the app.
+- Both services run on Render's free plan and sleep when idle. The first request can take about a minute while they wake; reload if the app shows "API offline".
+- The demo uses SQLite on an ephemeral disk and re-seeds its demo data on every boot, so changes you make are reset after a restart.
 
 ## Inspiration
 
@@ -32,11 +40,12 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 ### 1. Invoice chaser: state machine plus tone-aware AI reminder drafts
 - **Create and send invoices** with the PayPal **Invoicing API v2** (`POST /v2/invoicing/invoices`, then `POST /v2/invoicing/invoices/{id}/send`).
 - Each invoice moves through an explicit **state machine**: `draft → sent → due_soon → due → overdue_3 → overdue_7 → paid` (plus `cancelled`). Invalid transitions are rejected. Paying is idempotent, and paid or cancelled invoices are terminal.
-- A **LangGraph reminder agent** runs four nodes: `gather_context → analyze_sentiment → decide_tone_policy → draft_message`.
+- A **LangGraph reminder agent** runs five nodes: `gather_context → analyze_sentiment → decide_next_action → apply_guardrails → draft_message`.
   - *Context:* amount, due date, days overdue, the client's country, how late they paid past invoices, and their recent messages.
   - *Sentiment:* the LLM scores the client's recent messages. A lexicon scorer is the fallback.
-  - *Tone policy:* deterministic rules pick **friendly**, **neutral** or **firm**. A firm reminder can include an optional 1.5% late fee, which is calculated in code, not by the model.
-  - *Draft:* the LLM writes the email with country guidance (US: direct, net terms; DE: formal, cites the contract clause; GB: polite and understated; NL: direct; KE: warm). It is told to use only the amounts and dates it is given. If no model is configured, a template writes the draft.
+  - *Decide:* Claude chooses the next action (wait, remind, offer a split, offer Pay Later, escalate), the tone (**friendly**, **neutral** or **firm**) and a suggested late-fee percentage, with a rationale. Without a model, deterministic rules make the same decision.
+  - *Guardrails (code):* the fee is capped at 1.5% and allowed only from 7+ days overdue, and dropped when a split or Pay Later is offered; escalation needs 14+ days overdue; before the due date there is no firm tone and only a plain reminder; split installments are computed exactly and sum to the total. The fee amount is computed in code, never by the model.
+  - *Draft:* the LLM writes the email with country guidance (US: direct, net terms; DE: formal, cites the contract clause; GB: polite and understated; NL: direct; KE: warm). It is told to use only the amounts, dates, fee and installments it is given. A draft that mentions a fee the policy removed is replaced with a template, and a template is also used when no model is configured.
 - The UI shows the agent's reasoning beside each draft: risk, sentiment score, days overdue, and how late the client usually pays.
 - **Nothing is ever sent automatically.** "Approve" only marks a draft as approved. You copy the text and send it yourself.
 - **Payment detection:** an `INVOICING.INVOICE.PAID` or `PAYMENT.CAPTURE.COMPLETED` webhook marks the invoice paid and **cancels its pending reminder drafts**. Without a public webhook URL, **Sync with PayPal** polls `GET /v2/invoicing/invoices/{id}` for every open invoice and uses the same mark-paid path.
@@ -72,7 +81,7 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 - `agents.py` contains the two LangGraph `StateGraph`s. Each node records itself in a trace, and the UI shows that trace.
 - `filters.py` contains the FilterSpec schema, the validator, the deterministic parser, currency enforcement, and the exact summarizer.
 - `evidence_search.py` defines an `EvidenceSearch` interface with SQLite FTS5 and Postgres full-text implementations. It's built so a hybrid search backend can be swapped in later.
-- `llm.py` is a small client for any OpenAI-compatible chat endpoint, using JSON response format. Without a key, or if a call fails, it returns `None`, and every caller has a deterministic fallback. The app works with no model at all.
+- `llm.py` picks a provider automatically: with `ANTHROPIC_API_KEY` it calls Claude through the official Anthropic SDK using tool-use structured output; optionally, with `OPENAI_API_KEY` instead, any OpenAI-compatible endpoint in JSON mode; with no key, nothing. If a call fails or no key is set it returns `None`, and every caller has a deterministic fallback, so the app works with no model at all.
 - Webhooks: `POST /api/webhooks/paypal` verifies the signature, **de-duplicates by event ID**, then routes `INVOICING.INVOICE.PAID`, `PAYMENT.CAPTURE.COMPLETED` and `CUSTOMER.DISPUTE.CREATED`.
 - Database: SQLite by default. Setting `DATABASE_URL` switches to Postgres (for example Supabase). The demo runs on SQLite.
 
@@ -83,7 +92,7 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 - AG Grid tables with custom cell renderers for status badges, country flags, days late and per-row actions ("Send via PayPal", "✨ Draft reminder").
 
 **Quality and tooling**
-- **22 automated pytest tests** cover the state machine, filter validation (including a SQL-injection-shaped field name being rejected), currency handling, OAuth plus backoff (using `httpx.MockTransport`), the webhook signature request, the full invoice flow, webhook de-duplication, the dispute package and the guard against double submission, Sync polling, and exact KPI totals. All 22 pass.
+- **32 automated pytest tests** cover the state machine, filter validation (including a SQL-injection-shaped field name being rejected), currency handling, OAuth plus backoff (using `httpx.MockTransport`), the webhook signature request, the full invoice flow, webhook de-duplication, the dispute package and the guard against double submission, Sync polling, and exact KPI totals. Guardrails are tested too. All 32 pass.
 - `docker compose up --build`, or one script each for backend, frontend and tests.
 
 ## PayPal APIs used
@@ -104,12 +113,14 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 ## AI tools used and how
 
 **Inside the product**
-- **LLM:** `[AI_MODEL_NAME]`, reached through any OpenAI-compatible chat-completions endpoint in JSON mode (configured with `OPENAI_BASE_URL` and `LLM_MODEL`). It is used in four places:
+- **LLM:** Claude (`claude-sonnet-5-5`) through the Anthropic SDK with tool-use structured output. An OpenAI-compatible endpoint is supported as an optional alternative. It is used in these places:
   1. scoring the sentiment of a client's recent messages (reminder agent);
-  2. drafting the reminder email for a tone the rules have already chosen (reminder agent);
-  3. writing the dispute statement from the retrieved evidence only, with citations (dispute agent);
-  4. turning a ledger question into a JSON FilterSpec (conversational ledger).
-- **LangGraph** runs the two agents as explicit state graphs (4 nodes and 3 nodes), so every run produces a trace you can inspect.
+  2. deciding the next reminder action, tone and suggested fee, which code guardrails then bound (reminder agent);
+  3. drafting the reminder email from the guarded decision (reminder agent);
+  4. ranking evidence by relevance and flagging gaps (dispute agent; unknown ids are dropped and scores clamped to 0–1);
+  5. writing the dispute statement from the retrieved evidence only, with citations (dispute agent);
+  6. turning a ledger question into a JSON FilterSpec (conversational ledger).
+- **LangGraph** runs the two agents as explicit state graphs (5 nodes and 4 nodes), so every run produces a trace you can inspect.
 - **Guardrails, by design:**
   - The model never decides money. Late fees, totals, counts and days overdue are all computed in code.
   - The model never writes SQL. Its output is a spec checked against an allow-list.
@@ -117,7 +128,8 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
   - Every model call has a deterministic fallback, so a timeout or a missing key never breaks the workflow.
 
 **During development**
-- `[Placeholder: list any AI coding or writing assistants used while building, and what they were used for. Leave out if none.]`
+- **Cursor** and **Grok Bot** (AI coding assistants) were used while building the code and docs.
+- **Claude** is the model used at runtime inside the product (see above); it is not used to compute any amounts.
 
 ## Challenges we ran into
 
@@ -135,7 +147,7 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 - A dispute defense that **cites its sources**: every claim in the statement points to an evidence ID shown in the timeline.
 - A conversational ledger whose numbers you can **trust**: the applied filter is shown as badges, and the parser used (LLM or fallback) is labelled.
 - The whole product runs with **no credentials and no model** (mock PayPal plus deterministic fallbacks), and the same code moves to the real sandbox when you add keys.
-- 22 passing tests covering the risky parts: money, state, webhooks and PayPal retries.
+- 32 passing tests covering the risky parts: money, state, webhooks and PayPal retries.
 
 ## What we learned
 
@@ -156,4 +168,4 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 
 ## Built with
 
-`python` · `fastapi` · `langgraph` · `pydantic` · `sqlalchemy` · `sqlite` (FTS5) · `postgresql` (optional) · `httpx` · `uvicorn` · `pytest` · `typescript` · `react` · `next.js` · `ag-grid` · `paypal-invoicing-api-v2` · `paypal-disputes-api` · `paypal-webhooks` · `oauth2` · `openai-compatible-llm-api` · `docker` · `docker-compose`
+`python` · `fastapi` · `langgraph` · `pydantic` · `sqlalchemy` · `sqlite` (FTS5) · `postgresql` (optional) · `httpx` · `uvicorn` · `pytest` · `typescript` · `react` · `next.js` · `ag-grid` · `paypal-invoicing-api-v2` · `paypal-disputes-api` · `paypal-webhooks` · `oauth2` · `anthropic` · `claude` · `docker` · `docker-compose`

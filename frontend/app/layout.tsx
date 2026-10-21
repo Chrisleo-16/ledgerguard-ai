@@ -1,9 +1,14 @@
 import "./theme.css";
 import "./globals.css";
-import Nav from "@/components/nav";
-export const metadata = { title: "LedgerGuard AI: PayPal financial-ops copilot", description: "Agentic invoice chasing, dispute defense and a conversational ledger on PayPal." };
+import SwRegister from "@/components/sw-register";
+export const metadata = {
+  title: "LedgerGuard AI: PayPal financial-ops copilot",
+  description: "Agentic invoice chasing, dispute defense and a conversational ledger on PayPal.",
+  manifest: "/manifest.webmanifest",
+  icons: { icon: "/favicon.png", apple: "/icons/apple-touch-icon.png" },
+  appleWebApp: { capable: true, title: "LedgerGuard", statusBarStyle: "default" },
+};
+export const viewport = { themeColor: "#1a1a1a", width: "device-width", initialScale: 1 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (<html lang="en"><body><div className="shell"><Nav /><div style={{ minWidth: 0 }}>
-    <main className="page">{children}</main>
-    <footer>LedgerGuard AI · Every reminder and evidence submission needs your approval. Nothing is sent automatically.</footer></div></div></body></html>);
+  return (<html lang="en"><body>{children}<SwRegister /></body></html>);
 }

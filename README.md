@@ -85,12 +85,25 @@ flowchart TB
 | `backend/app/evidence_search.py` | FTS5 / tsvector evidence search |
 | `backend/app/db.py`, `seed.py` | SQLAlchemy models, demo data |
 | `backend/tests/` | state machine, filters, guardrails, webhooks, PayPal client |
-| `frontend/app/` | `/` chaser, `/disputes`, `/ledger` |
+| `frontend/app/` | `/` landing, `/how-it-works`, `/login` (demo), `/app` chaser, `/disputes`, `/ledger` |
+| `frontend/public/` | PWA manifest, service worker (app shell only), icons |
 | `frontend/components/` | AG Grid, nav, UI kit |
 | `render.yaml` | two-service Render blueprint |
 | `docs/` | Devpost write-up, demo script, README assets |
 
 ## Screens
+
+Landing page with the three workflows and an Install app button (the app is an installable PWA):
+
+![Landing page](docs/readme/screens/landing.png)
+
+How the AI works: what Claude decides and what code enforces:
+
+![How the AI works](docs/readme/screens/how-it-works.png)
+
+Demo login. No real authentication and no passwords; "Continue to demo" opens `/app`:
+
+![Demo login](docs/readme/screens/login.png)
 
 Invoice chaser with agent drafts, decision, rationale, and guardrail notes:
 
@@ -111,7 +124,7 @@ Python 3.11+ and Node 20+. Mock mode needs no credentials.
 ```bash
 cp .env.example .env
 ./run-backend.sh     # venv, seed, http://localhost:8000 (docs at /docs)
-./run-frontend.sh    # http://localhost:3000
+./run-frontend.sh    # http://localhost:3000 (landing), /app for the demo
 ./run-tests.sh       # 32 tests
 ```
 
@@ -162,6 +175,7 @@ Deploy: Render → New → Blueprint. `render.yaml` creates `ledgerguard-api` an
 
 ## Not yet
 
+- Login is a demo screen only: no accounts, no passwords. The PWA caches the app shell, never API data, so offline it shows the shell without live numbers.
 - Webhooks against a public URL: not yet exercised end to end. Sync polling is the tested path.
 - Real buyer payment and live disputes in the sandbox: untested.
 - Docker (`docker compose up --build`) and Postgres via `DATABASE_URL`: untested.

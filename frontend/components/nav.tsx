@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { Icon, IcName } from "@/components/icons";
-const LINKS: [string, string, IcName][] = [["/", "Invoices", "invoices"], ["/disputes", "Disputes", "disputes"], ["/ledger", "Ask the ledger", "ledger"]];
+const LINKS: [string, string, IcName][] = [["/app", "Invoices", "invoices"], ["/disputes", "Disputes", "disputes"], ["/ledger", "Ask the ledger", "ledger"]];
 export default function Nav() {
   const path = usePathname();
   const [h, setH] = useState<any>(null); const [down, setDown] = useState(false); const [counts, setCounts] = useState<any>(null);
@@ -12,12 +12,12 @@ export default function Nav() {
     const f = () => Promise.all([api("/api/health"), api("/api/summary")]).then(([x, s]) => { setH(x); setCounts(s); setDown(false); }).catch(() => setDown(true));
     f(); const t = setInterval(f, 5000); return () => clearInterval(t);
   }, []);
-  const badge: Record<string, number | undefined> = { "/": counts?.overdue.count, "/disputes": counts?.open_disputes.count };
+  const badge: Record<string, number | undefined> = { "/app": counts?.overdue.count, "/disputes": counts?.open_disputes.count };
   return <aside className="sidebar">
-    <Link href="/" className="logo"><span className="logo-mark"><Icon n="logo" size={15} /></span>LedgerGuard <small>AI</small></Link>
+    <Link href="/" className="logo" aria-label="LedgerGuard AI home"><span className="logo-mark"><Icon n="logo" size={15} /></span>LedgerGuard <small>AI</small></Link>
     <div className="nav-label">Workspace</div>
     <nav className="navlinks">{LINKS.map(([href, label, icon]) =>
-      <Link key={href} href={href} className={(href === "/" ? path === "/" : path.startsWith(href)) ? "active" : ""}>
+      <Link key={href} href={href} className={path.startsWith(href) ? "active" : ""}>
         <Icon n={icon} />{label}{badge[href] ? <span className="count">{badge[href]}</span> : null}</Link>)}</nav>
     <div className="env">
       {down ? <span className="pill"><span className="dot bad" />API offline</span> : h ? <>

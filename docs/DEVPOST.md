@@ -77,7 +77,9 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 - Database: SQLite by default. Setting `DATABASE_URL` switches to Postgres (for example Supabase). The demo runs on SQLite.
 
 **Frontend: Next.js 14 (App Router), TypeScript, React 18, AG Grid Community (Quartz theme)**
-- Three pages: Invoices (`/`), Disputes (`/disputes`) and Ask the ledger (`/ledger`), plus a sidebar showing live environment status.
+- Workspace pages: Invoices (`/app`), Disputes (`/disputes`) and Ask the ledger (`/ledger`), plus a sidebar showing live environment status.
+- Public pages: a landing page (`/`), a plain-language learning page on what the AI decides versus what code enforces (`/how-it-works`), and a clearly labelled demo login (`/login`) with no real authentication; "Continue to demo" opens `/app`, so judges are never blocked.
+- Installable PWA: web app manifest, generated monochrome-and-lime icons, and a service worker that caches only the app shell (never API responses). Chrome reports no installability errors.
 - AG Grid tables with custom cell renderers for status badges, country flags, days late and per-row actions ("Send via PayPal", "✨ Draft reminder").
 
 **Quality and tooling**
@@ -147,7 +149,7 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 - **Hybrid evidence search** (keyword plus semantic, for example Elastic) behind the existing `EvidenceSearch` interface.
 - **Evidence ingestion and file attachments:** uploading contracts and delivery PDFs, and attaching them to `provide-evidence` (the client already accepts files, but the app does not upload any yet).
 - **More dispute lifecycle events** (updates, resolution) and response-deadline alerts.
-- **Accounts and multi-tenancy:** today the app is single-user with no login.
+- **Accounts and multi-tenancy:** today the app is single-user; `/login` is a demo screen with no real authentication.
 - **Optional one-click sending** of approved reminders through the user's own email, still behind explicit approval.
 - A **hosted deployment** on Postgres/Supabase.
 - **Side project:** packaging the PayPal layer (OAuth, retries, idempotency, webhook verification, a mock that behaves like the sandbox) as an easy connector for African developers building on PayPal.

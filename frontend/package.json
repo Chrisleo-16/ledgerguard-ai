@@ -1,0 +1,27 @@
+{
+  "name": "ledgerguard-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ag-grid-community": "^32.3.9",
+    "ag-grid-react": "^32.3.9",
+    "next": "^14.2.35",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "typescript": "^5.9.3"
+  },
+  "private": true
+}

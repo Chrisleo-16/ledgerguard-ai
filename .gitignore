@@ -1,0 +1,32 @@
+# secrets / local config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# node / next
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+npm-debug.log*
+# data
+*.db
+*.db-journal
+*.sqlite*
+# design references / screenshots (third-party images, not ours to publish)
+ui-ref/
+ui-shots/
+*.png
+*.jpg
+*.jpeg
+# misc
+.DS_Store
+*.log
+agent-tools/

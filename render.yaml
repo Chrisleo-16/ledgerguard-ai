@@ -1,0 +1,62 @@
+# Render Blueprint for LedgerGuard AI: two web services (FastAPI backend + Next.js frontend).
+# Secrets use `sync: false` (you are prompted in the Render Dashboard; never committed).
+# Default demo: PAYPAL_MODE=mock + SQLite on the instance (re-seeded with demo data on every boot).
+services:
+  - type: web
+    name: ledgerguard-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: PAYPAL_MODE            # mock (judge-friendly, simulate buttons work) | sandbox (live PayPal sandbox)
+        value: mock
+      - key: SEED_DEMO_IF_EMPTY
+        value: "true"
+      - key: DATABASE_URL           # ephemeral SQLite; see README for Render Postgres
+        value: sqlite:///./ledgerguard.db
+      - key: MERCHANT_NAME
+        value: Chrisben Evans Leo
+      - key: FRONTEND_HOST          # used for CORS
+        fromService:
+          name: ledgerguard-web
+          type: web
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_WEBHOOK_ID
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: claude-sonnet-5-5
+
+  - type: web
+    name: ledgerguard-web
+    runtime: node
+    rootDir: frontend
+    plan: free
+    buildCommand: npm ci && NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://$API_HOST}" npm run build
+    startCommand: npm run start -- -p $PORT
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: API_HOST               # backend public hostname, baked into the build as NEXT_PUBLIC_API_URL
+        fromService:
+          name: ledgerguard-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+
+# Optional persistent data: uncomment, and on ledgerguard-api replace the DATABASE_URL entry with
+#   - key: DATABASE_URL
+#     fromDatabase: { name: ledgerguard-db, property: connectionString }
+# databases:
+#   - name: ledgerguard-db
+#     plan: free

@@ -23,6 +23,9 @@
   --info:#3a4a6b; --info-bg:#eef1f6; --info-text:#3a4a6b;
   --neutral-bg:#f2f2f2; --neutral-dot:#bdbdbd; --placeholder-on-dark:#b5b5b5; --answer-bg:#fbfdf5; --answer-border:#dff3a6;
   --meter-off:#e8e8e8;
+  /* landing tints (soft pastel card fills; text on them stays --text) */
+  --tint-lime:#f6fbe6; --tint-sky:#eef3fb; --tint-rose:#fcf0f1; --tint-sand:#faf6ec;
+  --hero-grad:radial-gradient(60% 70% at 78% 40%,#eefcc9 0%,rgba(238,252,201,0) 70%),linear-gradient(180deg,#ffffff,#fafafa);
   /* grid */
   --grid-cell-pad:12px; --grid-row-h:44px; --grid-font:13px;
   /* drafts */

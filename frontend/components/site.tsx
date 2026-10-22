@@ -12,11 +12,11 @@ export function SiteHeader() {
 export function SiteFooter() {
   return <footer className="site-foot"><div className="site-wrap foot-grid">
     <div><Link href="/" className="logo"><span className="logo-mark"><Icon n="logo" size={15} /></span>LedgerGuard</Link>
-      <p className="muted">PayPal AI Hackathon 2026. Sandbox only. Nothing is sent without your approval.</p></div>
+      <p className="muted">An AI copilot for freelancers on PayPal. Built for the PayPal AI Hackathon 2026.</p><Link href="/app" className="btn btn-pill">Open demo</Link></div>
     <nav aria-label="Product"><h2>Product</h2><Link href="/app">Demo</Link><Link href="/disputes">Disputes</Link><Link href="/ledger">Ask the ledger</Link></nav>
     <nav aria-label="Learn"><h2>Learn</h2><Link href="/how-it-works">How it works</Link><Link href="/login">Demo login</Link></nav>
     <nav aria-label="Project"><h2>Project</h2><a href={GITHUB} rel="noopener">GitHub</a><a href={GITHUB + "/blob/main/LICENSE"} rel="noopener">MIT License</a></nav>
-  </div><div className="site-wrap foot-base">© 2026 Chrisben Evans Leo</div></footer>;
+  </div><div className="site-wrap foot-base"><span>© 2026 Chrisben Evans Leo · MIT</span><span>PayPal sandbox only. Nothing is sent without your approval.</span></div></footer>;
 }
 /** Install button: uses the browser's beforeinstallprompt when offered; otherwise explains how to install. */
 export function InstallButton({ className = "btn ghost lg" }: { className?: string }) {

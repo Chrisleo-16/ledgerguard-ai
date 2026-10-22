@@ -8,7 +8,7 @@ export const Ic = { invoices: H.Invoice03Icon, disputes: H.Shield01Icon, ledger:
   contract: H.Agreement01Icon, milestone: H.Flag02Icon, delivery: H.PackageIcon, message: H.Message01Icon, file: H.Attachment01Icon,
   clock: H.Clock01Icon, demo: H.TestTube01Icon, enter: H.ArrowTurnBackwardIcon, search: H.Search01Icon, wallet: H.Wallet01Icon,
   received: H.MoneyReceive02Icon, money: H.Money03Icon, calendar: H.Calendar03Icon, db: H.DatabaseIcon, chevron: H.ArrowDown01Icon,
-  close: H.Cancel01Icon, user: H.UserIcon, tick: H.Tick02Icon, up: H.ArrowUp02Icon, logo: H.ShieldUserIcon, download: H.Download04Icon, arrow: H.ArrowRight01Icon, lock: H.LockIcon, code: H.SourceCodeIcon, human: H.UserCheck01Icon, arrowUpRight: H.ArrowUpRight01Icon, menu: H.Menu01Icon };
+  close: H.Cancel01Icon, user: H.UserIcon, tick: H.Tick02Icon, up: H.ArrowUp02Icon, logo: H.ShieldUserIcon, download: H.Download04Icon, arrow: H.ArrowRight01Icon, lock: H.LockIcon, code: H.SourceCodeIcon, human: H.UserCheck01Icon, arrowUpRight: H.ArrowUpRight01Icon, menu: H.Menu01Icon, arrowUp: H.ArrowUp01Icon };
 export type IcName = keyof typeof Ic;
 export function Icon({ n, size = 16, className, stroke = 1.5 }: { n: IcName; size?: number; className?: string; stroke?: number }) {
   return <HugeiconsIcon icon={Ic[n]} size={size} strokeWidth={stroke} className={`ic ${className || ""}`} aria-hidden="true" />;

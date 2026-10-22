@@ -22,12 +22,13 @@ export default function Landing() {
   return <div className="lp">
     <section className="lp-hero"><div className="site-wrap lp-hero-in">
       <div className="lp-hero-text">
+        <span className="eyebrow"><Icon n="ai" size={14} /> Claude + PayPal Sandbox</span>
         <h1>Chase invoices.<br />Win disputes.</h1>
         <p className="lp-lede">An AI copilot for freelancers on PayPal. It drafts reminders and dispute defenses. You approve every step.</p>
         <div className="row"><Link href="/app" className="btn btn-pill lg">Open demo</Link><Link href="/how-it-works" className="btn ghost btn-pill lg">How it works</Link></div>
       </div>
       <div className="lp-hero-art" aria-hidden="true">
-        <div className="phone"><div className="phone-notch" />
+        <div className="hero-glow" /><div className="phone"><div className="phone-notch" />
           <div className="ph-head"><span className="logo-mark"><Icon n="logo" size={13} /></span><b>Invoices</b></div>
           <div className="ph-kpi"><span className="muted">Outstanding · 7 open</span><b>USD 6,600.00</b><span className="muted">EUR 7,100.00 · GBP 1,250.00</span></div>
           <div className="ph-rows">{OPEN_ROWS.map(([n, c, a, s]) => <div key={n} className="ph-row"><div><b>{n}</b><span className="muted">{c}</span></div><div className="ph-r"><span>{a}</span><Badge s={s} /></div></div>)}</div>
@@ -37,7 +38,7 @@ export default function Landing() {
       </div>
     </div></section>
 
-    <p className="site-wrap lp-strip">PayPal Sandbox · Claude · AG Grid · Render</p>
+    <p className="site-wrap lp-strip"><span>Built with</span> PayPal Sandbox · Claude · AG Grid · Render</p>
 
     <section className="site-wrap lp-split">
       <div className="lp-visual">
@@ -82,12 +83,12 @@ export default function Landing() {
 
     <section className="site-wrap lp-sec"><h2 className="center">Questions</h2>
       <div className="faq-wrap">
-        <div className="faq">{FAQ.map(([q, a], i) => <details key={q} open={i === 0}><summary>{q}<Icon n="add" size={16} /></summary><p>{a}</p></details>)}</div>
+        <div className="faq card-soft">{FAQ.map(([q, a], i) => <details key={q} open={i === 0}><summary>{q}<Icon n="add" size={16} /></summary><p>{a}</p></details>)}</div>
         <aside className="faq-side"><h3>Still have questions?</h3><p>Read the full write-up and code on GitHub.</p><a href={GITHUB} rel="noopener" className="btn btn-pill">Open GitHub</a></aside>
       </div>
     </section>
 
-    <section className="site-wrap lp-sec"><div className="cta-dark">
+    <section className="site-wrap lp-sec"><div className="cta-dark"><svg className="cta-art" viewBox="0 0 400 400" aria-hidden="true">{[60, 110, 160, 210].map(r => <circle key={r} cx="400" cy="0" r={r} fill="none" stroke="#c6f432" strokeOpacity={0.5 - r / 600} />)}<circle cx="400" cy="0" r="40" fill="#c6f432" fillOpacity=".22" /></svg>
       <h2>Get paid sooner. Stay in control.</h2>
       <p>Seeded demo data. No account needed.</p>
       <div className="row" style={{ justifyContent: "center" }}><Link href="/app" className="btn btn-pill lg on-dark">Open demo</Link><InstallButton className="btn btn-pill lg ghost-dark" /></div>

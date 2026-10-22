@@ -26,17 +26,22 @@ export default function LedgerPage() {
   return (<>
     <PageHead icon="ledger" title="Ledger" sub="Ask a question in plain English. LedgerGuard turns it into a checked filter, so the AI never writes database queries, and every total is calculated from your data." />
     <div className="card">
-      <form className="askbar" onSubmit={e => { e.preventDefault(); ask(q); }}><Icon n="search" />
-        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Ask your ledger… e.g. past-due invoices over $1000" />
-        <button className="btn" type="submit" disabled={busy}>{busy ? <Thinking /> : <><Icon n="up" size={14} /> Ask</>}</button>
-        {res && <button type="button" className="btn ghost" onClick={reset}>Clear</button>}</form>
-      <div className="chips" style={{ marginTop: 10 }}>{EXAMPLES.map(x => <button key={x} className="chip" onClick={() => { setQ(x); ask(x); }}>{x}</button>)}</div>
+      <form className="ask" role="search" onSubmit={e => { e.preventDefault(); ask(q); }}>
+        <Icon n="search" size={18} className="ask-ic" />
+        <input value={q} onChange={e => setQ(e.target.value)} aria-label="Ask your ledger" placeholder="Ask your ledger… e.g. past-due invoices over $1000" />
+        {(q || res) && <button type="button" className="ask-clear" aria-label="Clear question and results" onClick={reset}><Icon n="close" size={14} /></button>}
+        <button className="ask-send" type="submit" disabled={busy || !q.trim()} aria-label="Ask">{busy ? <Thinking /> : <Icon n="arrowUp" size={18} stroke={2} />}</button></form>
+      <div className="ask-chips" aria-label="Example questions">{EXAMPLES.map(x => <button key={x} className="chip" onClick={() => { setQ(x); ask(x); }}>{x}</button>)}</div>
       {err && <div className="notice err" style={{ marginTop: 12 }}>{err}</div>}
-      {res && <div className="answer"><b>{res.summary.text}</b>
-        <div className="row" style={{ marginTop: 8, gap: 6 }}><span className="muted">Filter applied:</span>
-          {res.spec.conditions.length ? res.spec.conditions.map((c: any, i: number) => <span key={i} className="badge b-info">{fmtCond(c)}</span>) : <span className="muted">none (all rows)</span>}
-          {res.spec.sort && <span className="badge">sort {res.spec.sort.field} {res.spec.sort.dir}</span>}
-          <span className="muted">· parsed by {res.parser}</span></div></div>}
+      {res && <div className="answer2" aria-live="polite">
+        <div className="a-total">{Object.keys(res.summary.totals_by_currency || {}).length
+          ? Object.entries(res.summary.totals_by_currency).sort().map(([c, v]: any) => <span key={c}><small>{c}</small> {Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>)
+          : <span>No matching invoices</span>}</div>
+        <div className="a-meta">{res.summary.count} invoice{res.summary.count === 1 ? "" : "s"}{res.summary.past_due_count ? ` · ${res.summary.past_due_count} past due` : ""}{(() => { const m = /clients: (.*)\.$/.exec(res.summary.text); return m ? ` · ${m[1]}` : ""; })()}</div>
+        <div className="a-filters"><span className="muted">Filter</span>
+          {res.spec.conditions.length ? res.spec.conditions.map((c: any, i: number) => <span key={i} className="fchip">{fmtCond(c)}</span>) : <span className="muted">none (all rows)</span>}
+          {res.spec.sort && <span className="fchip">sort {res.spec.sort.field} {res.spec.sort.dir}</span>}
+          <span className="muted a-parser">parsed by {res.parser}</span></div></div>}
     </div>
     <div className="card"><div className="card-head"><h2><Icon n="db" />{res ? "Matching invoices" : "All invoices"}</h2><span className="muted">{rows.length} row{rows.length === 1 ? "" : "s"}</span></div>
       <div className="ag-theme-quartz ledger-grid">

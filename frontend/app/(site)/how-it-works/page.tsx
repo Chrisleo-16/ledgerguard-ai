@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Icon, IcName } from "@/components/icons";
+import { Card, CardBody, Chip } from "@heroui/react";
 export const metadata = { title: "How the AI works · LedgerGuard AI" };
 const Step = ({ ic, who, t, d }: { ic: IcName; who: "ai" | "code" | "human" | "paypal"; t: string; d: string }) =>
   <li className={`flow-step who-${who}`}><span className="flow-ic"><Icon n={ic} size={16} /></span><div><span className="flow-who">{{ ai: "Claude decides", code: "Code enforces", human: "You decide", paypal: "PayPal" }[who]}</span><b>{t}</b><p>{d}</p></div></li>;
@@ -16,7 +17,7 @@ const RULES: [string, string][] = [
 ];
 export default function HowItWorks() {
   return <article className="site-wrap learn">
-    <span className="eyebrow"><Icon n="ai" size={14} /> Learning page</span>
+    <Chip variant="flat" color="secondary" radius="full" startContent={<Icon n="ai" size={14} />} className="text-secondary-700">Learning page</Chip>
     <h1>How the AI works</h1>
     <p className="lede">LedgerGuard uses Claude for judgement: reading tone, choosing the next step, ranking evidence, turning questions into filters. Anything involving money, thresholds or sending is handled by plain code and by you. The model proposes; code bounds it; you approve.</p>
     <div className="legend" aria-label="Legend"><span className="who-ai"><i />Claude decides</span><span className="who-code"><i />Code enforces</span><span className="who-human"><i />You decide</span><span className="who-paypal"><i />PayPal call</span></div>
@@ -64,7 +65,7 @@ export default function HowItWorks() {
       <p className="muted">Allowed fields: number, client, country, currency, status, amount, days_overdue, issue_date, due_date, paid_at. Up to 10 conditions.</p></section>
 
     <section className="sec"><h2>The guardrails, in plain words</h2>
-      <div className="rules-grid">{RULES.map(([t, d]) => <div key={t} className="card"><h3><Icon n="lock" size={15} /> {t}</h3><p>{d}</p></div>)}</div></section>
-    <section className="sec row"><Link href="/app" className="btn lg">Open the demo <Icon n="arrow" /></Link><Link href="/" className="btn ghost lg">Back to overview</Link></section>
+      <div className="rules-grid">{RULES.map(([t, d]) => <Card key={t} shadow="sm" radius="lg" isHoverable className="rule-card"><CardBody className="p-5"><h3><Icon n="lock" size={15} /> {t}</h3><p>{d}</p></CardBody></Card>)}</div></section>
+    <section className="sec row"><Link href="/app" className="btn btn-pill lg">Open the demo <Icon n="arrow" /></Link><Link href="/" className="btn ghost btn-pill lg">Back to overview</Link></section>
   </article>;
 }

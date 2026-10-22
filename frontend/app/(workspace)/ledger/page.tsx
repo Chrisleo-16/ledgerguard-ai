@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api, post, Invoice } from "@/lib/api";
 import { Badge, PageHead, Thinking } from "@/components/ui";
+import { Button, Card, CardBody, Chip, Input, Kbd, Skeleton } from "@heroui/react";
 import { Icon } from "@/components/icons";
 import { AgGridReact, amountFmt, COUNTRY, useIsMobile } from "@/components/grid";
 const EXAMPLES = ["past-due invoices over $1000", "unpaid invoices from Germany", "paid invoices", "overdue more than 5 days", "largest open invoices in USD", "invoices under 1k"];
@@ -26,14 +27,19 @@ export default function LedgerPage() {
   return (<>
     <PageHead icon="ledger" title="Ledger" sub="Ask a question in plain English. LedgerGuard turns it into a checked filter, so the AI never writes database queries, and every total is calculated from your data." />
     <div className="card">
-      <form className="ask" role="search" onSubmit={e => { e.preventDefault(); ask(q); }}>
-        <Icon n="search" size={18} className="ask-ic" />
-        <input value={q} onChange={e => setQ(e.target.value)} aria-label="Ask your ledger" placeholder="Ask your ledger… e.g. past-due invoices over $1000" />
-        {(q || res) && <button type="button" className="ask-clear" aria-label="Clear question and results" onClick={reset}><Icon n="close" size={14} /></button>}
-        <button className="ask-send" type="submit" disabled={busy || !q.trim()} aria-label="Ask">{busy ? <Thinking /> : <Icon n="arrowUp" size={18} stroke={2} />}</button></form>
-      <div className="ask-chips" aria-label="Example questions">{EXAMPLES.map(x => <button key={x} className="chip" onClick={() => { setQ(x); ask(x); }}>{x}</button>)}</div>
+      <form role="search" onSubmit={e => { e.preventDefault(); ask(q); }}>
+        <Input aria-label="Ask your ledger" value={q} onValueChange={setQ} radius="full" size="lg" variant="bordered" placeholder="Ask your ledger… e.g. past-due invoices over $1000"
+          classNames={{ inputWrapper: "ask-wrap h-[52px] bg-content1 border-default-300 shadow-medium pr-1.5 data-[hover=true]:border-default-400 group-data-[focus=true]:border-foreground group-data-[focus=true]:ring-4 group-data-[focus=true]:ring-secondary-100", input: "text-[16px] placeholder:text-default-600" }}
+          startContent={<Icon n="search" size={18} className="text-default-600 shrink-0" />}
+          endContent={<div className="flex items-center gap-1.5 shrink-0">
+            {!q && <Kbd keys={["enter"]} className="hidden md:inline-flex text-[11px]">Enter</Kbd>}
+            {(q || res) && <Button isIconOnly size="sm" radius="full" variant="flat" aria-label="Clear question and results" onPress={reset} className="min-w-7 w-7 h-7"><Icon n="close" size={14} /></Button>}
+            <Button isIconOnly type="submit" radius="full" color="primary" aria-label="Ask" isDisabled={busy || !q.trim()} className="w-10 h-10 min-w-10">{busy ? <Thinking /> : <Icon n="arrowUp" size={18} stroke={2} />}</Button></div>} />
+      </form>
+      <div className="ask-chips" aria-label="Example questions">{EXAMPLES.map(x => <Chip key={x} as="button" variant="flat" radius="full" className="chip-btn cursor-pointer h-8 px-1 text-[13px] text-default-700 bg-default-100 hover:bg-default-200 transition-colors" onClick={() => { setQ(x); ask(x); }}>{x}</Chip>)}</div>
+      {busy && !res && <Card shadow="none" radius="lg" className="mt-4 bg-default-50"><CardBody className="gap-3 p-5"><Skeleton className="rounded-md h-7 w-48" /><Skeleton className="rounded-md h-4 w-72" /><Skeleton className="rounded-md h-4 w-60" /></CardBody></Card>}
       {err && <div className="notice err" style={{ marginTop: 12 }}>{err}</div>}
-      {res && <div className="answer2" aria-live="polite">
+      {res && <Card shadow="sm" radius="lg" className="answer2" aria-live="polite"><CardBody className="gap-1.5 p-5">
         <div className="a-total">{Object.keys(res.summary.totals_by_currency || {}).length
           ? Object.entries(res.summary.totals_by_currency).sort().map(([c, v]: any) => <span key={c}><small>{c}</small> {Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>)
           : <span>No matching invoices</span>}</div>
@@ -41,7 +47,7 @@ export default function LedgerPage() {
         <div className="a-filters"><span className="muted">Filter</span>
           {res.spec.conditions.length ? res.spec.conditions.map((c: any, i: number) => <span key={i} className="fchip">{fmtCond(c)}</span>) : <span className="muted">none (all rows)</span>}
           {res.spec.sort && <span className="fchip">sort {res.spec.sort.field} {res.spec.sort.dir}</span>}
-          <span className="muted a-parser">parsed by {res.parser}</span></div></div>}
+          <span className="muted a-parser">parsed by {res.parser}</span></div></CardBody></Card>}
     </div>
     <div className="card"><div className="card-head"><h2><Icon n="db" />{res ? "Matching invoices" : "All invoices"}</h2><span className="muted">{rows.length} row{rows.length === 1 ? "" : "s"}</span></div>
       <div className="ag-theme-quartz ledger-grid">

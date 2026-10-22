@@ -1,0 +1,7 @@
+/* Loaded before theme.css/globals.css so our own rules win on equal specificity. Preflight is disabled
+   (tailwind.config.js); this is the small part of it HeroUI relies on. */
+*,::before,::after{border-width:0;border-style:solid;border-color:currentColor}
+button,input,select,textarea{font:inherit;color:inherit}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

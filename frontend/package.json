@@ -11,10 +11,12 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@heroui/react": "2.7.11",
     "@hugeicons/core-free-icons": "^4.3.5",
     "@hugeicons/react": "^1.1.10",
     "ag-grid-community": "^32.3.9",
     "ag-grid-react": "^32.3.9",
+    "framer-motion": "~11.18.2",
     "next": "^14.2.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -23,6 +25,9 @@
     "@types/node": "^20.19.43",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
+    "autoprefixer": "^10.6.1",
+    "postcss": "^8.5.31",
+    "tailwindcss": "~3.4.17",
     "typescript": "^5.9.3"
   },
   "private": true

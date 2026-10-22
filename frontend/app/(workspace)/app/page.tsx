@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { api, post, Invoice, money, feeLabel } from "@/lib/api";
-import { Badge, Kpi, PageHead, DemoPanel, STATUS_LABEL, AiRationale } from "@/components/ui";
+import { Badge, Kpi, KpiSkeleton, PageHead, DemoPanel, STATUS_LABEL, AiRationale } from "@/components/ui";
+import { Button, Card, CardBody, Skeleton } from "@heroui/react";
 import { Icon, IconTile } from "@/components/icons";
 import { AgGridReact, amountFmt, COUNTRY, useIsMobile } from "@/components/grid";
 
@@ -38,17 +39,18 @@ export default function InvoicesPage() {
     { field: "status", headerName: "Status", width: 120, cellRenderer: (p: any) => <Badge s={p.value} /> },
     { headerName: "", colId: "actions", width: 168, sortable: false, resizable: false, cellRenderer: (p: any) => {
         const i: Invoice = p.data;
-        if (i.status === "draft") return <button className="btn sm" disabled={busy} onClick={() => act(() => post(`/api/invoices/${i.id}/send`), r => `Sent ${r.number} via PayPal`)}>Send via PayPal</button>;
-        if (OPEN.includes(i.status)) return <button className="btn sm ghost" disabled={busy} onClick={() => act(() => post(`/api/invoices/${i.id}/reminders`), r => `AI drafted a ${r.tone} reminder for ${i.number}. You'll find it under Reminder drafts.`)}><Icon n="ai" size={14} /> Draft reminder</button>;
+        if (i.status === "draft") return <Button color="primary" size="sm" radius="full" isDisabled={busy} onPress={() => act(() => post(`/api/invoices/${i.id}/send`), r => `Sent ${r.number} via PayPal`)}>Send via PayPal</Button>;
+        if (OPEN.includes(i.status)) return <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" isDisabled={busy} onPress={() => act(() => post(`/api/invoices/${i.id}/reminders`), r => `AI drafted a ${r.tone} reminder for ${i.number}. You'll find it under Reminder drafts.`)}><Icon n="ai" size={14} /> Draft reminder</Button>;
         return null; } },
   ] as any, [busy, mobile]);
 
   return (<>
     <PageHead icon="invoices" title="Invoices" sub="Every PayPal invoice, its status, and AI-drafted payment reminders. You approve every reminder before it goes anywhere."
       right={<div className="row">
-        <button className="btn ghost" disabled={busy} onClick={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.checked} checked, ${r.paid.length} newly paid, ${r.new_disputes.length} new disputes${r.errors.length ? `, ${r.errors.length} errors` : ""}.`)}><Icon n="sync" /> Sync with PayPal</button>
-        <button className="btn" onClick={() => setShowNew(!showNew)}>{showNew ? <><Icon n="close" /> Close</> : <><Icon n="add" /> New invoice</>}</button></div>} />
+        <Button variant="bordered" className="bg-content1 border-default-200" size="md" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.checked} checked, ${r.paid.length} newly paid, ${r.new_disputes.length} new disputes${r.errors.length ? `, ${r.errors.length} errors` : ""}.`)}><Icon n="sync" /> Sync with PayPal</Button>
+        <Button color="primary" size="md" radius="full" onPress={() => setShowNew(!showNew)}>{showNew ? <><Icon n="close" /> Close</> : <><Icon n="add" /> New invoice</>}</Button></div>} />
 
+    {!sum && <div className="kpis" aria-busy="true">{[0, 1, 2, 3].map(i => <KpiSkeleton key={i} />)}</div>}
     {sum && <div className="kpis">
       <Kpi label="Outstanding" icon="wallet" totals={sum.outstanding.totals} foot={`${sum.outstanding.count} of ${invs.length} invoices open`} part={sum.outstanding.count} whole={invs.length} />
       <Kpi label="Overdue" icon="clock" kind="bad" totals={sum.overdue.totals} foot={`${sum.overdue.count} past due · ${sum.drafts_pending} reminder draft${sum.drafts_pending === 1 ? "" : "s"} waiting`} part={sum.overdue.count} whole={sum.outstanding.count} />
@@ -66,26 +68,26 @@ export default function InvoicesPage() {
         <label className="field">Amount<input type="number" style={{ width: 120 }} value={form.amount} onChange={e => setForm({ ...form, amount: +e.target.value })} /></label>
         <label className="field">Currency<select value={form.currency} onChange={e => setForm({ ...form, currency: e.target.value })}>{["USD", "EUR", "GBP"].map(c => <option key={c}>{c}</option>)}</select></label>
         <label className="field">Due date<input type="date" value={form.due_date} onChange={e => setForm({ ...form, due_date: e.target.value })} /></label>
-        <button className="btn" disabled={busy} onClick={() => act(() => post("/api/invoices", { ...form, send: true }), r => { setShowNew(false); return `Invoice ${r.number} created and sent (PayPal ${r.paypal_id}).`; })}>Create & send</button>
+        <Button color="primary" size="md" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/invoices", { ...form, send: true }), r => { setShowNew(false); return `Invoice ${r.number} created and sent (PayPal ${r.paypal_id}).`; })}>Create & send</Button>
       </div></div>}
 
     <DemoPanel>
       <div className="group"><span>Time travel</span>
         {[1, 3, 7].map(d => <button key={d} className="btn ghost sm" disabled={busy} onClick={() => act(() => post("/api/dev/clock/advance", { days: d }), r => `Clock moved to ${r.today}. ${r.changes.length ? r.changes.map((c: any) => `${c.invoice}: ${STATUS_LABEL[c.from]} → ${STATUS_LABEL[c.to]}`).join(" · ") : "No status changes."}`)}>+{d} day{d > 1 ? "s" : ""}</button>)}
-        <button className="btn ghost sm" disabled={busy} onClick={() => act(() => post("/api/dev/clock/reset"), r => `Clock reset to ${r.today}.`)}>Reset to today</button></div>
+        <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/dev/clock/reset"), r => `Clock reset to ${r.today}.`)}>Reset to today</Button></div>
       <div className="group"><span>AI agent</span>
-        <button className="btn sm" disabled={busy} onClick={() => act(() => post("/api/reminders/run"), r => `Chaser agent reviewed open invoices and drafted ${r.drafted.length} reminder(s).`)}><Icon n="ai" size={14} /> Run chaser on all due/overdue invoices</button></div>
+        <Button color="primary" size="sm" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/reminders/run"), r => `Chaser agent reviewed open invoices and drafted ${r.drafted.length} reminder(s).`)}><Icon n="ai" size={14} /> Run chaser on all due/overdue invoices</Button></div>
       <div className="group"><span>Payment webhook</span>
         <select value={simId} onChange={e => setSimId(+e.target.value)}><option value={0}>Choose an open invoice…</option>
           {openInvs.map(i => <option key={i.id} value={i.id}>{i.number} · {i.client} · {money(i.amount, i.currency)}</option>)}</select>
-        <button className="btn ghost sm" disabled={busy || !simId} onClick={() => act(() => post("/api/dev/simulate/payment", { invoice_id: simId }), r => { setSimId(0); return `INVOICING.INVOICE.PAID received → ${r.result.invoice} marked paid, ${r.result.reminders_cancelled ?? 0} pending reminder(s) cancelled.`; })}>Simulate “invoice paid”</button>
+        <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" isDisabled={busy || !simId} onPress={() => act(() => post("/api/dev/simulate/payment", { invoice_id: simId }), r => { setSimId(0); return `INVOICING.INVOICE.PAID received → ${r.result.invoice} marked paid, ${r.result.reminders_cancelled ?? 0} pending reminder(s) cancelled.`; })}>Simulate “invoice paid”</Button>
         <span className="muted" style={{ width: "auto" }}>Mock mode only. In sandbox, pay the invoice and use Sync.</span></div>
     </DemoPanel>
 
     <div className="card"><div className="card-head"><h2><Icon n="db" />All invoices</h2><span className="muted">{invs.length} total</span></div>
       <div className="ag-theme-quartz">
-        <AgGridReact rowData={invs} columnDefs={cols} domLayout="autoHeight" pagination={invs.length > 10} paginationPageSize={10} paginationPageSizeSelector={[10, 25, 50]}
-          defaultColDef={{ sortable: true, resizable: true, suppressHeaderMenuButton: true }} rowHeight={44} getRowId={(p: any) => String(p.data.id)} />
+        {!sum ? <div className="grid gap-2 p-1">{[0, 1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="rounded-lg h-10 w-full" />)}</div> : <AgGridReact rowData={invs} columnDefs={cols} domLayout="autoHeight" pagination={invs.length > 10} paginationPageSize={10} paginationPageSizeSelector={[10, 25, 50]}
+          defaultColDef={{ sortable: true, resizable: true, suppressHeaderMenuButton: true }} rowHeight={44} getRowId={(p: any) => String(p.data.id)} />}
       </div></div>
 
     <div className="card"><div className="card-head"><h2><Icon n="mail" />Reminder drafts <span className="muted">· {rems.filter(r => r.status === "draft").length} waiting for review</span></h2>
@@ -100,20 +102,20 @@ export default function InvoicesPage() {
             <span className="muted">{r.reasoning.decision_source === "rules" ? "rules" : "AI · " + r.reasoning.decision_source}</span></div>; })}</div>}
         <div className="drafts-masonry">{letters.map(r => { const inv = invById[r.invoice_id]; const long = r.body.length > 420; const open = expanded[r.id];
           return (
-        <div key={r.id} className={`draft ${["draft", "approved"].includes(r.status) ? "" : "dim"}`}>
+        <Card key={r.id} shadow="sm" radius="lg" isHoverable className={`draft ${["draft", "approved"].includes(r.status) ? "" : "dim"}`}><CardBody className="p-4 overflow-visible">
           <div className="row" style={{ justifyContent: "space-between" }}>
             <div className="row" style={{ gap: 6 }}><b>{inv?.number}</b><span className="muted">{inv?.client}</span></div>
             <div className="row" style={{ gap: 6 }}><Badge s={r.tone} label={`${r.tone} tone`} /><Badge s={r.status} /></div></div>
           <div className="muted" style={{ marginTop: 4 }}>Risk {r.reasoning.risk} · client sentiment {r.reasoning.sentiment} · {r.reasoning.days_overdue} days overdue{r.reasoning.avg_days_late_history != null ? ` · usually pays ${r.reasoning.avg_days_late_history}d late` : ""}</div>
           <AiRationale r={r.reasoning} />
           <div className={`letter ${long && !open ? "clamped" : ""}`}><b>{r.subject}</b>{"\n\n"}{r.body}</div>
-          {long && <button className="btn ghost sm" onClick={() => setExpanded({ ...expanded, [r.id]: !open })}>{open ? "Show less" : "Show full draft"}</button>}
+          {long && <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" onPress={() => setExpanded({ ...expanded, [r.id]: !open })}>{open ? "Show less" : "Show full draft"}</Button>}
           {r.reasoning.draft_source && <div className="muted" style={{ marginTop: 6 }}>Written by {r.reasoning.draft_source === "template" ? "template (fallback)" : r.reasoning.draft_source}</div>}
           {r.late_fee > 0 && <div className="muted">Optional late fee mentioned: {feeLabel(r, inv?.currency)}</div>}
           {r.status === "draft" && <div className="row" style={{ marginTop: 8 }}>
-            <button className="btn ghost sm" onClick={() => { navigator.clipboard?.writeText(`${r.subject}\n\n${r.body}`); setNote({ t: "Reminder copied. Paste it into your email." }); }}><Icon n="copy" size={14} /> Copy text</button>
-            <button className="btn success sm" onClick={() => act(() => post(`/api/reminders/${r.id}/approve`), () => "Reminder approved. LedgerGuard never sends it for you.")}><Icon n="tick" size={14} /> Approve</button></div>}
-        </div>); })}</div></>}
+            <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" onPress={() => { navigator.clipboard?.writeText(`${r.subject}\n\n${r.body}`); setNote({ t: "Reminder copied. Paste it into your email." }); }}><Icon n="copy" size={14} /> Copy text</Button>
+            <Button color="success" size="sm" radius="full" onPress={() => act(() => post(`/api/reminders/${r.id}/approve`), () => "Reminder approved. LedgerGuard never sends it for you.")}><Icon n="tick" size={14} /> Approve</Button></div>}
+        </CardBody></Card>); })}</div></>}
     </div>
   </>);
 }

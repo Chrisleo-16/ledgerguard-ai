@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { api, post, Invoice, money } from "@/lib/api";
 import { Badge, PageHead, DemoPanel } from "@/components/ui";
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { Icon, IconTile, IcName } from "@/components/icons";
 const REASONS: Record<string, string> = { MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED: "Not as described", MERCHANDISE_OR_SERVICE_NOT_RECEIVED: "Not received", UNAUTHORISED: "Unauthorised" };
 const KIND_ICON: Record<string, IcName> = { contract: "contract", milestone: "milestone", delivery: "delivery", message: "message", file: "file" };
@@ -25,13 +26,13 @@ export default function DisputesPage() {
 
   return (<>
     <PageHead icon="disputes" title="Disputes" sub="When a buyer opens a PayPal dispute, LedgerGuard gathers your evidence and drafts a defense package. You review it before anything is submitted."
-      right={<button className="btn ghost" disabled={busy} onClick={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.new_disputes.length} new dispute(s).`)}><Icon n="sync" /> Check PayPal for disputes</button>} />
+      right={<Button variant="bordered" className="bg-content1 border-default-200" size="md" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.new_disputes.length} new dispute(s).`)}><Icon n="sync" /> Check PayPal for disputes</Button>} />
     {note && <div className={`notice ${note.err ? "err" : ""}`}>{note.t}</div>}
     <DemoPanel hint="simulate a CUSTOMER.DISPUTE.CREATED webhook (mock mode)">
       <div className="group"><span>Open a dispute</span>
         <select value={simInv} onChange={e => setSimInv(+e.target.value)}>{invs.map(i => <option key={i.id} value={i.id}>{i.number} · {i.client} · {money(i.amount, i.currency)}</option>)}</select>
         <select value={reason} onChange={e => setReason(e.target.value)}>{Object.entries(REASONS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
-        <button className="btn sm" disabled={busy || !simInv} onClick={() => act(() => post("/api/dev/simulate/dispute", { invoice_id: simInv, reason }), r => `Webhook received: dispute ${r.result.dispute_id} opened. ${r.result.evidence_items} evidence items found and a defense package was drafted.`)}>Simulate dispute webhook</button></div>
+        <Button color="primary" size="sm" radius="full" isDisabled={busy || !simInv} onPress={() => act(() => post("/api/dev/simulate/dispute", { invoice_id: simInv, reason }), r => `Webhook received: dispute ${r.result.dispute_id} opened. ${r.result.evidence_items} evidence items found and a defense package was drafted.`)}>Simulate dispute webhook</Button></div>
     </DemoPanel>
 
     {ds.length === 0 ? <div className="card empty"><IconTile n="disputes" big /><h2>No disputes. You're in good standing.</h2>
@@ -71,10 +72,12 @@ export default function DisputesPage() {
             <h3>Statement to PayPal</h3><div className="letter">{p.statement}</div>
             <div className="muted">Drafted by {p.generated_by} · Evidence type: {p.paypal_evidence_payload?.evidences?.[0]?.evidence_type}</div>
             <div style={{ marginTop: 14 }}>
-              {d.status === "package_ready" && !confirming && <button className="btn success" onClick={() => setConfirming(true)}><Icon n="check" /> Approve & submit evidence</button>}
-              {d.status === "package_ready" && confirming && <div className="notice"><b>Submit to PayPal?</b> This calls the provide-evidence API and can't be undone.
-                <div className="row" style={{ marginTop: 8 }}><button className="btn success sm" disabled={busy} onClick={() => act(() => post(`/api/disputes/${d.id}/submit-evidence`), () => "Evidence submitted to PayPal. The case is now under review.")}>Yes, submit</button>
-                <button className="btn ghost sm" onClick={() => setConfirming(false)}>Cancel</button></div></div>}
+              {d.status === "package_ready" && <Button color="success" size="md" radius="full" onPress={() => setConfirming(true)}><Icon n="check" /> Approve & submit evidence</Button>}
+              <Modal isOpen={confirming} onOpenChange={setConfirming} backdrop="blur" radius="lg" placement="center">
+                <ModalContent>{close => <><ModalHeader className="flex-col gap-1">Submit evidence to PayPal?</ModalHeader>
+                  <ModalBody><p style={{ margin: 0 }}>This calls the PayPal <code>provide-evidence</code> API for {d.paypal_dispute_id} with the statement and {(p.timeline || []).length} evidence items shown. It can't be undone, and LedgerGuard submits each package only once.</p></ModalBody>
+                  <ModalFooter><Button variant="bordered" radius="full" onPress={close}>Cancel</Button>
+                    <Button color="success" radius="full" isLoading={busy} onPress={() => act(() => post(`/api/disputes/${d.id}/submit-evidence`), () => "Evidence submitted to PayPal. The case is now under review.")}>Yes, submit</Button></ModalFooter></>}</ModalContent></Modal>
               {d.status === "submitted" && <div className="notice" style={{ background: "var(--ok-bg)", color: "var(--ok)" }}>Submitted {p.submitted_at?.slice(0, 16).replace("T", " ")} UTC. PayPal is reviewing.</div>}
             </div></div></div></>}
       </div>}</div>}

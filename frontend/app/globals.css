@@ -430,3 +430,34 @@ h1,h2,h3{letter-spacing:-.02em}
   .cta-dark{padding:56px 20px;margin-bottom:72px}.cta-art{width:240px;height:240px}.feat{min-height:0}.card-soft{padding:4px 16px}
 }
 .foot-grid a.btn{color:var(--on-brand);text-decoration:none}
+
+/* ---- v9 HeroUI integration: depth, and our classes on HeroUI parts ---- */
+.card{box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px -12px rgba(0,0,0,.10);background:linear-gradient(180deg,#fff,#fdfdfd)}
+.kpi-card{background:var(--surface)}.kpi .inner{border:0;padding:14px 16px;gap:2px}
+.kpi-progress{margin-top:auto;padding-top:12px}
+.lg-chip{height:22px;font-weight:var(--fw-medium);font-size:12px}
+.lg-chip.k-ok{background:var(--ok-bg);color:var(--ok)}.lg-chip.k-warn{background:var(--warn-bg);color:var(--warn)}.lg-chip.k-bad{background:var(--bad-bg);color:var(--bad)}
+.lg-chip.k-info{background:var(--info-bg);color:var(--info)}.lg-chip.k-neutral{background:var(--neutral-bg);color:var(--text-2)}
+.demo-acc{margin-bottom:var(--space-5)}.demo-item{background:var(--surface-2)!important;border:1px dashed var(--neutral-dot);box-shadow:none!important;border-radius:var(--radius)!important}
+.demo-body{display:grid;gap:12px}.demo-body .group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.demo-body .group>span{width:120px;font-size:var(--fs-label);color:var(--text-default)}
+.env-chip{height:30px;max-width:100%;border-width:1px;border-color:var(--border);background:var(--surface);color:var(--nav-pill-text);font-size:var(--fs-xs);justify-content:flex-start;border-radius:var(--radius-sm)}
+.env-chip>span:last-child{overflow:hidden;text-overflow:ellipsis}
+.nav-item[data-selected=true]{border:1px solid var(--border)}
+.drawer-side{display:flex;flex-direction:column;gap:var(--space-2);padding:14px 12px;background:var(--nav-bg)}.drawer-side .env{margin-top:auto}
+.site-nav-hero .logo{padding:0}.hnav{text-decoration:none;color:var(--text-default);font-size:var(--fs-label);font-weight:var(--fw-medium);padding:6px 10px;border-radius:var(--radius-sm);white-space:nowrap}.hnav:hover{background:var(--selected);color:var(--text)}
+.eyebrow-chip{margin-bottom:22px;font-weight:var(--fw-medium)}
+.feat{padding:0;min-height:240px;text-align:left}.feat .ic{flex:none}
+.faq{border:1px solid var(--border)}.faq-side{background:var(--brand)!important;color:var(--on-brand)}.faq-side h3{color:var(--on-brand);font-size:19px;font-weight:var(--fw-medium);margin:0}
+.draft-card,.ch-card{padding:0}
+.draft{padding:0;margin:0 0 var(--space-3)}
+.answer2{padding:0;background:var(--answer-bg)!important;border:1px solid var(--answer-border)}
+.ask-chips{margin-top:14px}.ask-chips .chip-btn{flex:none}
+.rule-card{margin:0}.rule-card h3{margin-top:0!important}
+.login h1{margin:0}.login .card-header{padding:0}
+.user-row{display:flex;gap:8px;align-items:center;font-size:var(--fs-label);padding:4px 2px}
+@media (max-width:768px){.sidebar{display:none}.demo-body .group{flex-direction:column;align-items:stretch}.demo-body .group>span{width:auto}.demo-body select{width:100%}}
+/* preflight is off: neutralise our global element styles inside HeroUI parts */
+ul[role=listbox],ul[data-slot=list],[data-slot=base]>ul{padding:0;margin:0;list-style:none}
+.nav-item,.nav-item *{text-decoration:none;color:inherit}
+input[data-slot=input]{border:0!important;padding:0!important;background:transparent!important;border-radius:0!important;outline:none!important;box-shadow:none!important;min-width:0}
+.demo-item{padding:0 14px!important}.demo-acc{padding:0!important}

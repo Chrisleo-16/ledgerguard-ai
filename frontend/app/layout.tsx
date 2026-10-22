@@ -1,6 +1,8 @@
 import "./theme.css";
 import "./globals.css";
+import { Rubik } from "next/font/google";
 import SwRegister from "@/components/sw-register";
+const rubik = Rubik({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-rubik", display: "swap" });
 export const metadata = {
   title: "LedgerGuard AI: PayPal financial-ops copilot",
   description: "Agentic invoice chasing, dispute defense and a conversational ledger on PayPal.",
@@ -10,5 +12,5 @@ export const metadata = {
 };
 export const viewport = { themeColor: "#1a1a1a", width: "device-width", initialScale: 1 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (<html lang="en"><body>{children}<SwRegister /></body></html>);
+  return (<html lang="en" className={rubik.variable}><body>{children}<SwRegister /></body></html>);
 }

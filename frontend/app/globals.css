@@ -326,3 +326,45 @@ label.field{font-weight:var(--fw-regular);font-size:var(--fs-label);color:var(--
   .lp-split,.lp-split.rev{grid-template-columns:1fr;gap:32px;padding:48px 20px}.lp-split.rev .lp-copy{order:2}.lp-visual{padding:20px;min-height:0}
   .charts{grid-template-columns:1fr}.lp-sec{padding:48px 20px 0}.feat3,.faq-wrap{grid-template-columns:1fr}.cta-dark{padding:48px 20px;border-radius:24px}
   .foot-grid{grid-template-columns:1fr 1fr}.foot-grid>div:first-child{grid-column:1/-1}.site-nav a{display:inline-block!important;white-space:nowrap}.site-nav a[href^="https"]{display:none!important}.site-head .btn.btn-pill{white-space:nowrap;margin-left:8px}}
+
+/* ---- Rubik tuning: slightly wider and rounder than Inter, so tighten headings and trim the largest sizes ---- */
+body,button,input,select,textarea{font-family:var(--font-sans)}
+.ag-theme-quartz{--ag-font-family:var(--font-sans)}
+h1,h2,h3{letter-spacing:-.02em}
+.lp-hero h1{font-size:62px;letter-spacing:-.035em}.lp h2{font-size:36px;letter-spacing:-.025em}.learn h1{font-size:42px}
+.kpi .value{letter-spacing:-.03em}.page-head h1{letter-spacing:-.02em}
+.btn,.badge,.pill{letter-spacing:-.01em}
+.mtop,.scrim,.drawer-close{display:none}
+/* ---- mobile dashboard (<= 768px): top bar + slide-in drawer ---- */
+@media (max-width:768px){
+  html,body{overflow-x:hidden}
+  .shell{display:block}
+  .mtop{display:flex;position:sticky;top:0;z-index:30;height:52px;align-items:center;gap:10px;padding:0 12px;background:var(--nav-bg);border-bottom:1px solid var(--border)}
+  .mtop b{flex:1;font-weight:var(--fw-medium);font-size:15px}
+  .mtop-btn{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);color:var(--text);cursor:pointer}
+  .sidebar{position:fixed;top:0;left:0;bottom:0;height:100dvh;width:min(84vw,300px);z-index:50;flex-direction:column;flex-wrap:nowrap;align-items:stretch;transform:translateX(-100%);transition:transform var(--dur) var(--ease);box-shadow:var(--shadow-lg);overflow-y:auto}
+  .sidebar.open{transform:none}
+  .sidebar .navlinks{flex-direction:column}.sidebar .env{margin-top:auto;flex-direction:column}
+  .drawer-close{display:grid;position:absolute;top:10px;right:10px}
+  .scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:40}
+  .page{padding:16px 12px}
+  .page-head{flex-direction:column;align-items:stretch;gap:12px}.page-head h1{font-size:20px}.page-head .row{flex-wrap:wrap}
+  .page-head .row .btn{flex:1 1 auto;justify-content:center}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .kpi{padding:12px}.kpi .value{font-size:16px}.kpi .value .sub{font-size:13px}
+  .card{padding:14px;border-radius:var(--radius-md)}.card-head{flex-wrap:wrap}
+  .demo .group{flex-direction:column;align-items:stretch}.demo .group>span{width:auto}.demo select{width:100%}
+  .drafts-masonry{columns:1!important;display:block}.draft{break-inside:avoid}
+  .wait-row{flex-wrap:wrap}
+  .ag-theme-quartz{max-width:100%;overflow:hidden}
+  .split,.two-col{grid-template-columns:1fr!important}
+  .askbar{flex-wrap:wrap}.askbar input{min-width:0;flex:1 1 160px}
+  .letter,.timeline,pre{overflow-wrap:anywhere;word-break:break-word}
+  img,svg{max-width:100%}
+  footer{padding:8px 12px 24px}
+  .simple-table{display:block;max-width:100%;overflow-x:auto}
+  .activity li{flex-wrap:wrap}.activity li .muted{margin-left:0!important;overflow-wrap:anywhere}
+  .kpi .inner{padding:10px}
+}
+@media (max-width:340px){.kpis{grid-template-columns:1fr}}
+@media (max-width:400px){.site-head-in{gap:8px}.site-nav a{padding:6px 6px;font-size:12px}.site-head .btn.btn-pill{padding:0 12px;font-size:13px}}

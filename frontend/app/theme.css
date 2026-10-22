@@ -3,7 +3,7 @@
    Direction: quiet monochrome product UI with one fresh accent, compact type, hairline borders, card-in-tray surfaces. */
 :root{
   /* typography: compact scale, medium (not bold) weights */
-  --font-sans: Inter, "SF Pro Text", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--font-rubik), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; /* Rubik (OFL) everywhere */
   --font-size: 14px;   /* body */
   --fs-xs: 12px; --fs-label: 13px; --fs-title: 16px; --fs-h1: 18px; --fs-metric: 24px; --fs-metric-multi: 18px;
   --fw-regular: 400; --fw-medium: 500; --fw-strong: 600;

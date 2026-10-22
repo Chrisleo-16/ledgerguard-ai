@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api, post, Invoice, money, feeLabel } from "@/lib/api";
 import { Badge, Kpi, PageHead, DemoPanel, STATUS_LABEL, AiRationale } from "@/components/ui";
 import { Icon, IconTile } from "@/components/icons";
-import { AgGridReact, amountFmt, COUNTRY } from "@/components/grid";
+import { AgGridReact, amountFmt, COUNTRY, useIsMobile } from "@/components/grid";
 
 const OPEN = ["sent", "due_soon", "due", "overdue_3", "overdue_7"];
 export default function InvoicesPage() {
@@ -28,8 +28,9 @@ export default function InvoicesPage() {
 
   const waitNotes = visibleRems.filter(r => r.status === "no_action");
   const letters = visibleRems.filter(r => r.status !== "no_action");
+  const mobile = useIsMobile();
   const cols = useMemo(() => [
-    { field: "number", headerName: "Invoice", width: 210, minWidth: 210, cellRenderer: (p: any) => <span className="cell-lead"><IconTile n="invoices" size={13} />{p.value}</span> },
+    { field: "number", headerName: "Invoice", width: mobile ? 150 : 210, minWidth: mobile ? 150 : 210, pinned: mobile ? "left" : undefined, cellRenderer: (p: any) => <span className="cell-lead"><IconTile n="invoices" size={13} />{p.value}</span> },
     { field: "client", headerName: "Client", flex: 1, minWidth: 150, wrapText: true, autoHeight: true,
       cellRenderer: (p: any) => <span>{p.value} <span className="cell-sub">{COUNTRY[p.data.country] || p.data.country}</span></span> },
     { field: "amount", headerName: "Amount", width: 130, type: "rightAligned", cellRenderer: (p: any) => <span><span className="cell-sub">{p.data.currency}</span> {amountFmt(p)}</span> },
@@ -40,7 +41,7 @@ export default function InvoicesPage() {
         if (i.status === "draft") return <button className="btn sm" disabled={busy} onClick={() => act(() => post(`/api/invoices/${i.id}/send`), r => `Sent ${r.number} via PayPal`)}>Send via PayPal</button>;
         if (OPEN.includes(i.status)) return <button className="btn sm ghost" disabled={busy} onClick={() => act(() => post(`/api/invoices/${i.id}/reminders`), r => `AI drafted a ${r.tone} reminder for ${i.number}. You'll find it under Reminder drafts.`)}><Icon n="ai" size={14} /> Draft reminder</button>;
         return null; } },
-  ] as any, [busy]);
+  ] as any, [busy, mobile]);
 
   return (<>
     <PageHead icon="invoices" title="Invoices" sub="Every PayPal invoice, its status, and AI-drafted payment reminders. You approve every reminder before it goes anywhere."

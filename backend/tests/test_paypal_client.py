@@ -15,7 +15,32 @@ def test_backoff_and_oauth():
     sleeps = []
     c = SandboxPayPalClient("id", "secret", transport=httpx.MockTransport(handler), sleep=sleeps.append)
     assert c.create_invoice({})["id"] == "INV2-ABC"
-    assert len(sleeps) == 2 and sleeps[1] > sleeps[0] * 1.5
+    # Exponential backoff 0.5 * 2**attempt plus up to 0.25 s jitter. Check the documented ranges rather than a
+    # ratio between two jittered values (that ratio check failed whenever jitter on the first delay was large).
+    assert len(sleeps) == 2
+    assert 0.5 <= sleeps[0] <= 0.75 and 1.0 <= sleeps[1] <= 1.25
+
+def test_backoff_doubles_without_jitter(monkeypatch):
+    import app.paypal as pp
+    monkeypatch.setattr(pp.random, "uniform", lambda a, b: 0.0)
+    n = {"i": 0}
+    def handler(req):
+        if req.url.path == "/v1/oauth2/token": return httpx.Response(200, json={"access_token": "T", "expires_in": 3600})
+        n["i"] += 1
+        return httpx.Response(503) if n["i"] < 4 else httpx.Response(201, json={"href": "https://x/v2/invoicing/invoices/INV2-Z"})
+    sleeps = []
+    SandboxPayPalClient("id", "s", transport=httpx.MockTransport(handler), sleep=sleeps.append).create_invoice({})
+    assert sleeps == [0.5, 1.0, 2.0]
+
+def test_retry_after_header_is_honoured():
+    n = {"i": 0}
+    def handler(req):
+        if req.url.path == "/v1/oauth2/token": return httpx.Response(200, json={"access_token": "T", "expires_in": 3600})
+        n["i"] += 1
+        return httpx.Response(429, headers={"Retry-After": "7"}) if n["i"] == 1 else httpx.Response(201, json={"href": "https://x/v2/invoicing/invoices/INV2-Y"})
+    sleeps = []
+    SandboxPayPalClient("id", "s", transport=httpx.MockTransport(handler), sleep=sleeps.append).create_invoice({})
+    assert sleeps == [7.0]
 
 def test_verify_signature_request():
     def handler(req):

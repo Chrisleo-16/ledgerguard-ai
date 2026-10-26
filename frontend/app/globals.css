@@ -504,3 +504,89 @@ input[data-slot=input]{border:0!important;padding:0!important;background:transpa
 .notice-main{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.notice-title{font-weight:600;color:var(--text)}.notice-desc{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
 .notice-more{border:0;background:none;padding:0;font:inherit;font-size:12px;color:var(--text-2);text-decoration:underline;cursor:pointer}.notice-debug{font-size:11px;color:var(--text-2);word-break:break-word;white-space:pre-wrap}
 .notice.notice-x{background:var(--surface)!important;color:var(--text-2)!important;border:1px solid var(--border)}.notice.notice-x.err{border-left:3px solid var(--text)}.notice.notice-x .notice-close{color:var(--text)!important}
+/* Status toasts — adapted from Uiverse.io by akshat-patel28 (MIT). Text colours darkened from the original for WCAG AA. */
+.st{--c:#1e7a1c;--tint:#04e40048;--wave:#04e4003a;position:relative;overflow:hidden;box-sizing:border-box;width:100%;min-height:80px;padding:12px 14px 12px 15px;border-radius:8px;background:#fff;box-shadow:rgba(149,157,165,.2) 0 8px 24px;display:flex;align-items:center;gap:15px;font-family:inherit}
+.st-success{--c:#1e7a1c;--tint:#04e40048;--wave:#04e4003a}
+.st-error{--c:#c0262d;--tint:#fc0c0c33;--wave:#fc0c0c26}
+.st-warning{--c:#8a5300;--tint:#ffb40040;--wave:#ffb40033}
+.st-info,.st-loading{--c:#1a5fc2;--tint:#0a84ff2e;--wave:#0a84ff24}
+.st-wave{position:absolute;transform:rotate(90deg);left:-31px;top:32px;width:80px;fill:var(--wave);pointer-events:none}
+.st-ic{flex:none;width:35px;height:35px;margin-left:8px;display:grid;place-items:center;border-radius:50%;background:var(--tint);color:var(--c);position:relative}
+.st-ic svg{width:17px;height:17px}
+.st-spin{width:17px;height:17px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:st-rot .8s linear infinite}
+@keyframes st-rot{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.st-spin{animation-duration:2.4s}}
+.st-txt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;position:relative}
+.st-title,.st-sub{margin:0}
+.st-title{color:var(--c);font-size:17px;font-weight:700;line-height:1.25}
+.st-sub{font-size:14px;line-height:1.4;color:#555}.st-sub strong{color:#333;font-weight:600}
+.st-more{border:0;background:none;padding:0;margin-top:2px;font:inherit;font-size:12px;color:#555;text-decoration:underline;cursor:pointer}
+.st-debug{font-size:11px;color:#555;white-space:pre-wrap;word-break:break-word}
+.st-x{flex:none;align-self:flex-start;width:28px;height:28px;margin:-2px -6px 0 0;display:grid;place-items:center;border:0;border-radius:999px;background:transparent;color:#555;cursor:pointer;position:relative}
+.st-x svg{width:18px;height:18px}.st-x:hover{background:rgba(0,0,0,.06)}.st-x:focus-visible,.st-more:focus-visible{outline:2px solid #111;outline-offset:2px}
+.st-inline{margin-bottom:14px;border:1px solid #eee}
+.st-stack{position:fixed;z-index:60;right:20px;bottom:20px;width:min(360px,calc(100vw - 32px));display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.st-stack>*{pointer-events:auto}
+@media (max-width:640px){.st-stack{right:auto;bottom:auto;left:50%;top:12px;transform:translateX(-50%);flex-direction:column-reverse}}
+/* Cookie consent — adapted from Uiverse.io by ilkhoeri (MIT) */
+.cc{position:fixed;z-index:55;left:20px;bottom:20px;width:calc(100vw - 32px);max-width:300px;box-sizing:border-box;margin-top:64px;padding:56px 20px 16px;border-radius:16px;background:#fff;color:#3f3f46;box-shadow:0 1px 2px rgba(60,64,67,.3),0 2px 6px 2px rgba(60,64,67,.15);font-family:inherit}
+.cc-art{position:absolute;left:50%;top:-52px;width:104px;height:104px;transform:translateX(-50%);filter:drop-shadow(0 4px 6px rgba(99,70,71,.25))}
+.cc-h{margin:0 0 6px;font-size:15px;font-weight:600;color:#18181b}
+.cc-p{margin:0;font-size:13px;line-height:1.5;text-align:justify;hyphens:auto}
+.cc-p a{color:#634647;text-decoration:underline;font-weight:500}.cc-more{margin-top:8px}
+.cc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+.cc-opt{border:0;background:none;padding:4px 0;font:inherit;font-size:13px;color:#52525b;cursor:pointer}.cc-opt:hover{text-decoration:underline}
+.cc-ok{border:0;border-radius:999px;padding:8px 20px;font:inherit;font-size:13px;font-weight:600;background:#ddad81;color:#3f2a2b;cursor:pointer;transition:background .2s,color .2s}
+.cc-ok:hover{background:#634647;color:#ddad81}
+.cc a:focus-visible,.cc button:focus-visible{outline:2px solid #634647;outline-offset:2px;border-radius:6px}.cc-ok:focus-visible{border-radius:999px}
+@media (max-width:640px){.cc{left:0;right:0;margin-left:auto;margin-right:auto;bottom:16px}}
+/* Animated arrow CTA — adapted from Uiverse.io by gharsh11032000 (MIT) */
+.acta{--e:cubic-bezier(.23,1,.32,1);position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box;overflow:hidden;
+  padding:14px 40px;border:0;border-radius:100px;background:#111;color:#fff;box-shadow:0 0 0 2px #c6f432;font:inherit;font-size:15px;font-weight:600;line-height:1.1;
+  text-decoration:none;white-space:nowrap;cursor:pointer;isolation:isolate;transition:border-radius .6s var(--e),color .6s var(--e),transform .2s var(--e)}
+.acta-sm{padding:9px 30px;font-size:13px}.acta-lg{padding:16px 44px;font-size:16px}.acta-full{width:100%}
+.acta-arr{position:absolute;width:20px;height:20px;fill:#c6f432;z-index:2;transition:all .8s var(--e)}
+.acta-sm .acta-arr{width:15px;height:15px}
+.acta-arr-out{right:14px}.acta-sm .acta-arr-out{right:10px}
+.acta-arr-in{left:-25%}
+.acta-txt{position:relative;z-index:2;transform:translateX(-10px);transition:transform .8s var(--e)}
+.acta-sm .acta-txt{transform:translateX(-7px)}
+.acta-circle{position:absolute;top:50%;left:50%;width:20px;height:20px;border-radius:50%;background:#c6f432;opacity:0;transform:translate(-50%,-50%);z-index:1;transition:all .8s var(--e)}
+.acta:hover,.acta:focus-visible{color:#111;border-radius:12px;outline:none}
+.acta:focus-visible{box-shadow:0 0 0 2px #c6f432,0 0 0 4px #111}
+.acta:hover .acta-arr-out,.acta:focus-visible .acta-arr-out{right:-25%}
+.acta:hover .acta-arr-in,.acta:focus-visible .acta-arr-in{left:14px}
+.acta-sm:hover .acta-arr-in,.acta-sm:focus-visible .acta-arr-in{left:10px}
+.acta:hover .acta-txt,.acta:focus-visible .acta-txt{transform:translateX(10px)}
+.acta-sm:hover .acta-txt,.acta-sm:focus-visible .acta-txt{transform:translateX(7px)}
+.acta:hover .acta-arr,.acta:focus-visible .acta-arr{fill:#111}
+.acta:hover .acta-circle,.acta:focus-visible .acta-circle{width:240%;height:auto;aspect-ratio:1;opacity:1}
+.acta:active{transform:scale(.95)}
+@media (prefers-reduced-motion:reduce){
+  .acta,.acta *{transition:none!important}
+  .acta:hover,.acta:focus-visible{background:#c6f432;border-radius:100px}
+  .acta:hover .acta-circle,.acta:focus-visible .acta-circle{opacity:0}
+  .acta .acta-arr-in{display:none}.acta .acta-txt,.acta:hover .acta-txt,.acta:focus-visible .acta-txt{transform:translateX(-10px)}
+  .acta:hover .acta-arr-out,.acta:focus-visible .acta-arr-out{right:14px}.acta:active{transform:none}
+}
+@media (max-width:959.98px){.v-nav-r>.v-npill-cta{display:none}}.v-nav-r{align-items:center;gap:10px}.mm-cta .acta{padding:13px 30px;font-size:14px}.mm-cta .acta-arr{width:16px;height:16px}.mm-cta .acta-arr-out{right:10px}.mm-cta .acta:hover .acta-arr-in,.mm-cta .acta:focus-visible .acta-arr-in{left:10px}.mm-cta .acta-txt{transform:translateX(-6px)}.mm-cta .acta:hover .acta-txt,.mm-cta .acta:focus-visible .acta-txt{transform:translateX(6px)}
+/* Download button — adapted from Uiverse.io by sahilxkhadka (MIT) */
+.dlb-wrap{position:relative;display:inline-flex}
+.dlb{display:inline-flex;align-items:center;gap:8px;padding:16px 32px;border:0;border-radius:24px;background:rgba(0,0,0,.8);color:#f1f1f1;font:inherit;font-size:15px;font-weight:600;
+  box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);cursor:pointer;transition:background .2s}
+.dlb:hover,.dlb:focus-visible{background:rgba(0,0,0,.7)}.dlb:focus-visible{outline:2px solid #111;outline-offset:3px}
+.dlb:disabled{cursor:default;background:rgba(0,0,0,.8)}
+.dlb-tip{position:absolute;top:calc(100% + 8px);left:50%;transform:translate(-50%,-4px);width:max-content;max-width:220px;padding:6px 10px;border-radius:8px;background:rgba(0,0,0,.7);
+  color:#fff;font-size:12px;line-height:1.35;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20}
+.dlb-wrap:hover .dlb-tip,.dlb:focus-visible+.dlb-tip{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){.dlb,.dlb-tip{transition:none}}
+/* Animated checkbox — adapted from Uiverse.io by SelfMadeSystem (MIT) */
+.acb{display:inline-flex;align-items:center;gap:8px;cursor:pointer;position:relative}
+.acb-in{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.acb-svg{overflow:visible;flex:none;border-radius:4px}
+.acb-path{fill:none;stroke:#111;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:241 9999999;stroke-dashoffset:0;
+  transition:stroke-dasharray .5s ease,stroke-dashoffset .5s ease}
+.acb-in:checked+.acb-svg .acb-path{stroke-dasharray:70.5096664428711 9999999;stroke-dashoffset:-262.2723388671875}
+.acb-dark .acb-path{stroke:#fff}.acb-dark .acb-in:checked+.acb-svg .acb-path{stroke:#c6f432}
+.acb-in:focus-visible+.acb-svg{outline:2px solid #111;outline-offset:3px}.acb-dark .acb-in:focus-visible+.acb-svg{outline-color:#c6f432}
+@media (prefers-reduced-motion:reduce){.acb-path{transition:none}}

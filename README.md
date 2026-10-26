@@ -198,3 +198,5 @@ Deploy: Render → New → Blueprint. `render.yaml` creates `ledgerguard-api` an
 - API docs: `http://localhost:8000/docs`
 
 MIT © 2026 Chrisben Evans Leo. See [LICENSE](LICENSE).
+
+UI credits: status toasts adapted from Uiverse.io by akshat-patel28 and the cookie card from Uiverse.io by ilkhoeri, the workflow cards from Uiverse.io by satyamchaudharydev, and the animated CTA button from Uiverse.io by gharsh11032000, the download button from Uiverse.io by sahilxkhadka, the animated checkbox from Uiverse.io by SelfMadeSystem (all MIT). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

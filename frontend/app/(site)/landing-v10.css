@@ -133,10 +133,10 @@
 /* get + footer */
 .v-get{display:flex;justify-content:space-between;align-items:center;gap:20px;background:#efefef;border-radius:28px;padding:28px 32px;flex-wrap:wrap}
 .v-get h2{font-size:22px;font-weight:500;margin:0 0 6px}.v-get p{margin:0;color:#555;font-size:13px}
-.v-apps{display:flex;gap:12px;align-items:center}
+.v-apps{align-items:center;display:flex;gap:12px;align-items:center}
 .v-app{width:56px;height:56px;border-radius:18px;background:#fff;display:grid;place-items:center;color:#1a1a1a;box-shadow:0 10px 20px -8px rgba(0,0,0,.25),0 0 0 1px #e6e6e6;transition:transform .2s}
 .v-app:hover{transform:translateY(-3px)}.v-app.dark{background:#1a1a1a;color:#c6f432}
-.v-app-wrap button{height:56px!important;border-radius:18px!important;background:#c6f432!important;border:0!important;color:#1a1a1a!important;box-shadow:0 10px 20px -8px rgba(120,170,0,.6)}
+
 .v-foot{margin-top:14px;margin-bottom:24px}.v-foot>*{background:#fff}
 .v-foot-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:32px;padding:32px;border-radius:28px 28px 0 0;box-shadow:0 0 0 1px #ececec}
 .v-foot-brand p{font-size:12.5px;color:#555;line-height:1.6;max-width:340px;margin:12px 0 16px}
@@ -173,3 +173,18 @@ html{scroll-padding-top:84px}
 #features:focus,#workflows:focus,#faq:focus{outline:none}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 .flag-i{border-radius:50%;flex:none;display:inline-block;vertical-align:middle;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+
+/* v13: arrow-corner workflow cards — adapted from Uiverse.io by satyamchaudharydev (MIT) */
+.v-tiles{list-style:none;margin:0;align-items:stretch}.v-tiles>li{flex:none;display:flex;scroll-snap-align:center}
+.v-acard{position:relative;box-sizing:border-box;width:230px;min-height:150px;display:flex;flex-direction:column;gap:6px;padding:1rem 1rem 2.6rem;border-radius:.75rem;background:#f1f1f3;color:#1a1a1a;text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.06),0 6px 18px -10px rgba(0,0,0,.18);overflow:hidden;transition:box-shadow .2s,transform .2s}
+.v-acard-t{font-size:1.15rem;font-weight:600;line-height:1.25;color:#111;text-underline-offset:3px;text-decoration-thickness:2px}
+.v-acard-c{font-size:.86rem;line-height:1.45;color:#3c3852}
+.v-acard-m{margin-top:auto;font-size:.8rem;color:#5f5c70}
+.v-acard-arrow{position:absolute;right:0;bottom:0;width:2.4rem;height:2.1rem;display:grid;place-items:center;background:#c6f432;color:#1a1a1a;border-radius:.75rem 0 .75rem 0;transition:background .2s,color .2s}
+.v-acard-arrow svg{transition:transform .2s}
+.v-acard:hover .v-acard-t,.v-acard:focus-visible .v-acard-t{text-decoration-line:underline;text-decoration-color:#111}
+.v-acard:hover .v-acard-arrow,.v-acard:focus-visible .v-acard-arrow{background:#111;color:#fff}
+.v-acard:hover .v-acard-arrow svg,.v-acard:focus-visible .v-acard-arrow svg{transform:translateX(3px)}
+.v-acard:focus-visible{outline:2px solid #111;outline-offset:3px}
+.v-acard.on{box-shadow:0 0 0 2px #c6f432,0 0 0 3px #1a1a1a,0 18px 36px -16px rgba(0,0,0,.35);transform:translateY(-6px)}
+@media (prefers-reduced-motion:reduce){.v-acard,.v-acard-arrow,.v-acard-arrow svg{transition:none}}

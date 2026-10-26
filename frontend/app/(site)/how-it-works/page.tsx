@@ -22,7 +22,7 @@ export default function HowItWorks() {
     <p className="lede">LedgerGuard uses Claude for judgement: reading tone, choosing the next step, ranking evidence, turning questions into filters. Anything involving money, thresholds or sending is handled by plain code and by you. The model proposes; code bounds it; you approve.</p>
     <div className="legend" aria-label="Legend"><span className="who-ai"><i />Claude decides</span><span className="who-code"><i />Code enforces</span><span className="who-human"><i />You decide</span><span className="who-paypal"><i />PayPal call</span></div>
 
-    <section className="sec"><h2>1. Invoice chaser</h2>
+    <section className="sec" id="chaser"><h2>1. Invoice chaser</h2>
       <ol className="flow">
         <Step ic="clock" who="code" t="Gather context" d="Amount, due date, days overdue, country, past payment speed, recent client messages." />
         <Step ic="ai" who="ai" t="Choose the next action" d="Wait, remind, offer a split, offer Pay Later, or escalate, plus a tone and a suggested fee %." />
@@ -44,7 +44,7 @@ export default function HowItWorks() {
         <p className="muted">Split example: USD 1,450.00 → USD 725.00 now + USD 725.00 within 14 days, no fee.</p></figure>
     </section>
 
-    <section className="sec"><h2>2. Dispute defense</h2>
+    <section className="sec" id="disputes"><h2>2. Dispute defense</h2>
       <ol className="flow">
         <Step ic="disputes" who="paypal" t="Dispute arrives" d="CUSTOMER.DISPUTE.CREATED webhook, or Sync reads /v1/customer/disputes." />
         <Step ic="search" who="code" t="Search evidence" d="Full-text search over that client's contracts, milestones, delivery notes and messages." />
@@ -53,7 +53,7 @@ export default function HowItWorks() {
         <Step ic="human" who="human" t="Approve & submit" d="Only this click calls provide-evidence, and a second submission is refused." />
       </ol></section>
 
-    <section className="sec"><h2>3. Ask the ledger</h2>
+    <section className="sec" id="ledger"><h2>3. Ask the ledger</h2>
       <div className="ledger-diag">
         <div className="card"><span className="flow-who">You ask</span><p>“past-due invoices over $1000”</p></div><Icon n="arrow" />
         <div className="card who-ai-b"><span className="flow-who">Claude fills a schema</span><pre>{`{"conditions":[
@@ -64,7 +64,7 @@ export default function HowItWorks() {
       </div>
       <p className="muted">Allowed fields: number, client, country, currency, status, amount, days_overdue, issue_date, due_date, paid_at. Up to 10 conditions.</p></section>
 
-    <section className="sec"><h2>The guardrails, in plain words</h2>
+    <section className="sec" id="guardrails"><h2>The guardrails, in plain words</h2>
       <div className="rules-grid">{RULES.map(([t, d]) => <Card key={t} shadow="sm" radius="lg" isHoverable className="rule-card"><CardBody className="p-5"><h3><Icon n="lock" size={15} /> {t}</h3><p>{d}</p></CardBody></Card>)}</div></section>
     <section className="sec row"><Link href="/app" className="btn btn-pill lg">Open the demo <Icon n="arrow" /></Link><Link href="/" className="btn ghost btn-pill lg">Back to overview</Link></section>
   </article>;

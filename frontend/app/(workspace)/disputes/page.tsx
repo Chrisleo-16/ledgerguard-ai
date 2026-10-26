@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { api, post, Invoice, money } from "@/lib/api";
 import { Badge, PageHead, DemoPanel, Notice, errNote, type Note } from "@/components/ui";
+import { useToast } from "@/components/toast";
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { Icon, IconTile, IcName } from "@/components/icons";
 const REASONS: Record<string, string> = { MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED: "Not as described", MERCHANDISE_OR_SERVICE_NOT_RECEIVED: "Not received", UNAUTHORISED: "Unauthorised" };
@@ -11,7 +12,7 @@ export default function DisputesPage() {
   const [ev, setEv] = useState<any[]>([]); const [activity, setActivity] = useState<any[]>([]);
   const [ds, setDs] = useState<any[]>([]); const [invs, setInvs] = useState<Invoice[]>([]); const [selId, setSelId] = useState<number | null>(null);
   const [simInv, setSimInv] = useState(0); const [reason, setReason] = useState(Object.keys(REASONS)[0]);
-  const [note, setNote] = useState<Note>(null); const [busy, setBusy] = useState(false); const [confirming, setConfirming] = useState(false);
+  const [note, setNote] = useState<Note>(null); const toast = useToast(); const [busy, setBusy] = useState(false); const [confirming, setConfirming] = useState(false);
   const load = async () => {
     const [d, i, e, a] = await Promise.all([api("/api/disputes"), api("/api/invoices"), api("/api/evidence/summary"), api("/api/activity")]);
     setDs(d); setInvs(i); setEv(e); setActivity(a);
@@ -19,20 +20,20 @@ export default function DisputesPage() {
     setSimInv(cur => cur || (i.find((x: Invoice) => x.client.startsWith("Brightwave") && x.status !== "paid") || i[0])?.id || 0);
   };
   useEffect(() => { load().catch(e => setNote(errNote(e))); }, []);
-  const act = async (f: () => Promise<any>, ok: (r: any) => string) => { setBusy(true); try { const r = await f(); setNote({ t: ok(r) }); await load(); } catch (e) { setNote(errNote(e)); } finally { setBusy(false); setConfirming(false); } };
+  const act = async (o: { loading: string; success: string }, f: () => Promise<any>, ok: (r: any) => string) => { setBusy(true); try { const r = await toast.run(f, { ...o, message: ok }); if (r !== undefined) await load(); } catch {} finally { setBusy(false); setConfirming(false); } };
   const d = ds.find(x => x.id === selId); const p = d?.package || {}; const inv = invs.find(i => i.id === d?.invoice_id);
   const asmt = p.assessment || {}; const rel: Record<number, any> = Object.fromEntries((asmt.ranked || []).map((r: any) => [r.evidence_id, r]));
   const msIds = new Set((p.milestone_refs || []).map((m: any) => m.evidence_id));
 
   return (<>
     <PageHead icon="disputes" title="Disputes" sub="When a buyer opens a PayPal dispute, LedgerGuard gathers your evidence and drafts a defense package. You review it before anything is submitted."
-      right={<Button variant="bordered" className="bg-content1 border-default-200" size="md" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.new_disputes.length} new dispute(s).`)}><Icon n="sync" /> Check PayPal for disputes</Button>} />
+      right={<Button variant="bordered" className="bg-content1 border-default-200" size="md" radius="full" isDisabled={busy} onPress={() => act({ loading: "Syncing with PayPal…", success: "Sync done" }, () => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.new_disputes.length} new dispute(s).`)}><Icon n="sync" /> Check PayPal for disputes</Button>} />
     <Notice note={note} onClose={() => setNote(null)} />
     <DemoPanel hint="simulate a CUSTOMER.DISPUTE.CREATED webhook (mock mode)">
       <div className="group"><span>Open a dispute</span>
         <select value={simInv} onChange={e => setSimInv(+e.target.value)}>{invs.map(i => <option key={i.id} value={i.id}>{i.number} · {i.client} · {money(i.amount, i.currency)}</option>)}</select>
         <select value={reason} onChange={e => setReason(e.target.value)}>{Object.entries(REASONS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
-        <Button color="primary" size="sm" radius="full" isDisabled={busy || !simInv} onPress={() => act(() => post("/api/dev/simulate/dispute", { invoice_id: simInv, reason }), r => `Webhook received: dispute ${r.result.dispute_id} opened. ${r.result.evidence_items} evidence items found and a defense package was drafted.`)}>Simulate dispute webhook</Button></div>
+        <Button color="primary" size="sm" radius="full" isDisabled={busy || !simInv} onPress={() => act({ loading: "Simulating the dispute…", success: "Dispute opened" }, () => post("/api/dev/simulate/dispute", { invoice_id: simInv, reason }), r => `Webhook received: dispute ${r.result.dispute_id} opened. ${r.result.evidence_items} evidence items found and a defense package was drafted.`)}>Simulate dispute webhook</Button></div>
     </DemoPanel>
 
     {ds.length === 0 ? <div className="card empty"><IconTile n="disputes" big /><h2>No disputes. You're in good standing.</h2>
@@ -77,7 +78,7 @@ export default function DisputesPage() {
                 <ModalContent>{close => <><ModalHeader className="flex-col gap-1">Submit evidence to PayPal?</ModalHeader>
                   <ModalBody><p style={{ margin: 0 }}>This calls the PayPal <code>provide-evidence</code> API for {d.paypal_dispute_id} with the statement and {(p.timeline || []).length} evidence items shown. It can't be undone, and LedgerGuard submits each package only once.</p></ModalBody>
                   <ModalFooter><Button variant="bordered" radius="full" onPress={close}>Cancel</Button>
-                    <Button color="success" radius="full" isLoading={busy} onPress={() => act(() => post(`/api/disputes/${d.id}/submit-evidence`), () => "Evidence submitted to PayPal. The case is now under review.")}>Yes, submit</Button></ModalFooter></>}</ModalContent></Modal>
+                    <Button color="success" radius="full" isLoading={busy} onPress={() => act({ loading: "Submitting evidence to PayPal…", success: "Evidence submitted" }, () => post(`/api/disputes/${d.id}/submit-evidence`), () => "Evidence submitted to PayPal. The case is now under review.")}>Yes, submit</Button></ModalFooter></>}</ModalContent></Modal>
               {d.status === "submitted" && <div className="notice" style={{ background: "var(--ok-bg)", color: "var(--ok)" }}>Submitted {p.submitted_at?.slice(0, 16).replace("T", " ")} UTC. PayPal is reviewing.</div>}
             </div></div></div></>}
       </div>}</div>}

@@ -1,9 +1,11 @@
 "use client";
 import { Flag } from "@/components/flag";
 import Link from "next/link";
+import { AnimatedCTA } from "@/components/animated-cta";
 import { Icon, IcName } from "@/components/icons";
 import { Accordion, AccordionItem, Button, Chip } from "@heroui/react";
-import { InstallButton, GITHUB } from "@/components/site";
+import { GITHUB } from "@/components/site";
+import { InstallAppButton } from "@/components/download-button";
 /* Every figure below comes from the seeded demo data the live app shows (backend/app/seed.py). Nothing is invented. */
 
 const Chipi = ({ n }: { n: IcName }) => <span className="ichip" aria-hidden="true"><Icon n={n} size={18} /></span>;
@@ -37,7 +39,16 @@ const PhoneReminder = () => <Phone className="ph-solo">
 </Phone>;
 
 const FEATS: [IcName, string][] = [["mail", "Drafts polite, firm or final reminders for each overdue invoice"], ["key", "Late fees capped at 1.5% and escalation blocked before 14 days"], ["file", "Ranks contracts, milestones and messages into dispute evidence"], ["human", "One-tap approve; nothing is sent or submitted on its own"]];
-const TILES: [string, string][] = [["Invoice chaser", "Drafts, never sends"], ["Dispute defense", "Ranked evidence, you approve"], ["Ledger chat", "Plain English to a checked filter"], ["PayPal Invoicing v2", "Sandbox invoices"], ["PayPal Disputes", "Evidence submission"], ["PayPal Webhooks", "Live status sync"], ["Claude", "Reasoning and drafting"], ["AG Grid", "Fast invoice tables"]];
+const TILES: [string, string, string, string][] = [
+  ["Invoice chaser", "Drafts the next reminder. It never sends for you.", "Workflow", "/how-it-works#chaser"],
+  ["Dispute defense", "Ranks your evidence. You approve before PayPal sees it.", "Workflow", "/how-it-works#disputes"],
+  ["Ledger chat", "Plain-English questions become a checked filter.", "Workflow", "/how-it-works#ledger"],
+  ["Sandbox invoices", "Create, send and track invoices.", "PayPal Invoicing v2", "/how-it-works#chaser"],
+  ["Evidence submission", "Submit the approved package to the case.", "PayPal Disputes", "/how-it-works#disputes"],
+  ["Live status sync", "Paid and dispute events update the ledger.", "PayPal Webhooks", "/how-it-works#guardrails"],
+  ["Reasoning and drafting", "Picks tone and next step; code checks every number.", "Claude", "/how-it-works#guardrails"],
+  ["Fast invoice tables", "Sort and filter the whole ledger.", "AG Grid", "/ledger"],
+];
 const FAQ: [string, string][] = [
   ["Does LedgerGuard send emails or money for me?", "No. Reminders stay drafts you copy and send yourself. Dispute evidence goes to PayPal only after you click Approve and confirm."],
   ["Is this connected to real PayPal money?", "No. It uses the PayPal sandbox (Invoicing v2, Disputes, Webhooks) or a mock with the same shapes. The live demo uses seeded data."],
@@ -53,7 +64,7 @@ export default function Landing() {
       <Eyebrow t="Free demo · PayPal sandbox" />
       <h1 className="v-h1">Get Paid On Time. <br />Defend Every <span className="hl">Dollar</span>.</h1>
       <p className="v-sub">An AI copilot for freelancers on PayPal. It chases late invoices, builds dispute evidence and answers questions about your ledger, and you approve every step.</p>
-      <div className="v-row c"><Button as={Link} href="/app" radius="full" className="v-black sm">Get Started</Button><Button as={Link} href="/app" radius="full" variant="light" className="v-ghost" startContent={<Icon n="arrowUpRight" size={15} />}>View demo</Button></div>
+      <div className="v-row c"><AnimatedCTA href="/app">Get Started</AnimatedCTA><Button as={Link} href="/app" radius="full" variant="light" className="v-ghost" startContent={<Icon n="arrowUpRight" size={15} />}>View demo</Button></div>
       <div className="v-stage" aria-hidden="true">
         <div className="v-map" />
         <span className="flag f1"><Flag code="US" size={22} /></span><span className="flag f2"><Flag code="DE" size={22} /></span><span className="flag f3"><Flag code="GB" size={22} /></span><span className="flag f4"><Flag code="KE" size={22} /></span>
@@ -81,7 +92,7 @@ export default function Landing() {
       <div className="v-wrap"><Eyebrow t="Global coverage" />
         <h2 className="v-h2 c">Paid From <Chipi n="coins" /> 200+ Markets</h2>
         <p className="v-p c">PayPal works in more than 200 markets, and LedgerGuard follows your invoices in whatever currency your clients pay.</p>
-        <div className="v-row c"><Button as={Link} href="/ledger" radius="full" className="v-black sm">Ask Your Ledger</Button></div></div>
+        <div className="v-row c"><AnimatedCTA href="/ledger">Ask Your Ledger</AnimatedCTA></div></div>
     </section>
 
     {/* why choose */}
@@ -107,7 +118,7 @@ export default function Landing() {
         <h2 className="v-h2">Simple &amp; Safe Chasing, <Chipi n="human" /> Every Step</h2>
         <p className="v-p">LedgerGuard pairs Claude&apos;s judgement with hard rules in code, so every draft is useful and every number is checked.</p>
         <ul className="v-feats">{FEATS.map(([n, t]) => <li key={t}><span className="v-fi"><Icon n={n} size={15} /></span>{t}</li>)}</ul>
-        <div className="v-row"><Button as={Link} href="/app" radius="full" className="v-black sm">Get Started</Button><a href="#faq" className="v-link"><Icon n="book" size={15} />FAQ</a></div>
+        <div className="v-row"><AnimatedCTA href="/app">Get Started</AnimatedCTA><a href="#faq" className="v-link"><Icon n="book" size={15} />FAQ</a></div>
       </div>
       <div className="v-two-r"><PhoneReminder /></div>
     </section>
@@ -118,13 +129,18 @@ export default function Landing() {
       <Eyebrow t="Revenue protection" />
       <h2 className="v-h2 c">How LedgerGuard Protects Your <Chipi n="money" /> Revenue</h2>
       <p className="v-p c">LedgerGuard reads your PayPal invoices, client messages and delivery records. Claude decides the next step and drafts the words; code caps late fees at 1.5%, blocks escalation before 14 days and calculates every total. When a buyer opens a dispute, it ranks your contracts, milestones and acceptance messages into an evidence package and waits for your approval before anything reaches PayPal.</p>
-      <div className="v-row c"><Button as={Link} href="/app" radius="full" className="v-black sm">Open Demo</Button><Button as={Link} href="/how-it-works" radius="full" variant="light" className="v-ghost" startContent={<Icon n="book" size={15} />}>View How It Works</Button></div>
+      <div className="v-row c"><AnimatedCTA href="/app">Open Demo</AnimatedCTA><Button as={Link} href="/how-it-works" radius="full" variant="light" className="v-ghost" startContent={<Icon n="book" size={15} />}>View How It Works</Button></div>
     </section>
 
     {/* 5 tiles */}
     <section className="v-multi" id="workflows">
       <div className="v-wrap"><h2 className="v-h2 c">Multiple Workflows &amp; APIs</h2><p className="v-p c">Three workflows built on PayPal APIs, so you can chase, defend and ask from one place.</p></div>
-      <div className="v-tiles" tabIndex={0} aria-label="Workflows and APIs">{TILES.map(([t, s], i) => <div key={t} className={`v-tile ${i === 1 ? "on" : ""}`}><b>{t}</b><span>{s}</span></div>)}</div>
+      {/* Arrow-corner cards adapted from Uiverse.io by satyamchaudharydev (MIT) */}
+      <ul className="v-tiles" aria-label="Workflows and APIs">{TILES.map(([t, c, m, href], i) => <li key={t}>
+        <Link href={href} className={`v-acard ${i === 1 ? "on" : ""}`}>
+          <span className="v-acard-t">{t}</span><span className="v-acard-c">{c}</span><span className="v-acard-m">{m}</span>
+          <span className="v-acard-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M13.2 5.3a1 1 0 0 1 1.4 0l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 1 1-1.4-1.4l4.3-4.3H4a1 1 0 1 1 0-2h13.5l-4.3-4.3a1 1 0 0 1 0-1.4z"/></svg></span>
+        </Link></li>)}</ul>
     </section>
 
     {/* 6 FAQ */}
@@ -143,7 +159,7 @@ export default function Landing() {
       <div><h2>Get LedgerGuard</h2><p>Chase invoices and defend disputes from any device, as a web app or an installed PWA.</p></div>
       <div className="v-apps">
         <Link href="/app" className="v-app" aria-label="Open web app"><Icon n="arrowUpRight" size={20} /></Link>
-        <InstallIcon />
+        <InstallAppButton />
         <Link href="/ledger" className="v-app dark" aria-label="Ask the ledger"><Icon n="ledger" size={20} /></Link>
       </div>
     </div></section>
@@ -159,5 +175,3 @@ export default function Landing() {
     </footer>
   </div>;
 }
-/* Icon-only install button for the Get card (reuses the PWA install logic) */
-function InstallIcon() { return <span className="v-app-wrap"><InstallButton /></span>; }

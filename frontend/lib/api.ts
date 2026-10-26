@@ -7,6 +7,7 @@ export class ApiError extends Error {
 }
 const WAKING: UserErr = { title: "Waking up the server.", message: "The demo server sleeps when nobody is using it, and it takes about 30 seconds to start.",
   action: "Wait a moment, then try again. This page will retry by itself.", code: "server_waking" };
+const wake = (d: "start" | "done" | "fail") => { if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("lg:waking", { detail: d })); };
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 /** Turn anything thrown into a plain-language error (never raw codes or JSON). */
 export function toUserErr(e: unknown): UserErr {
@@ -23,13 +24,14 @@ export async function api<T = any>(path: string, opts: RequestInit = {}): Promis
     const body = r ? await r.json().catch(() => null) : null;
     const asleep = !r || (!r.ok && !body?.error && [502, 503, 504].includes(r.status));
     if (asleep) {
-      if (get && attempt < 3) { await sleep(10000); continue; }
-      throw new ApiError({ ...WAKING, debug: r ? `HTTP ${r.status} from ${path}` : `Network error on ${path}` });
+      if (get && attempt < 3) { wake("start"); await sleep(10000); continue; }
+      wake("fail"); throw new ApiError({ ...WAKING, debug: r ? `HTTP ${r.status} from ${path}` : `Network error on ${path}` });
     }
     if (!r!.ok) {
       const info: UserErr = body?.error || toUserErr(null);
       throw new ApiError({ ...info, debug: body?.debug || `HTTP ${r!.status} ${path}` });
     }
+    if (attempt) wake("done");
     return body as T;
   }
 }

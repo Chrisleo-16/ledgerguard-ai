@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { AnimatedCTA } from "@/components/animated-cta";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -60,8 +61,8 @@ export function MobileMenu({ links, title = "Menu", active, onNavigate }: { link
                 <span>{l.label}</span>{l.badge != null ? <em>{l.badge}</em> : <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>}
               </Link></motion.div>)}
             <motion.div className="mm-cta" variants={{ h: { opacity: 0, y: 10 * d }, s: { opacity: 1, y: 0 } }} transition={reduce ? { duration: 0 } : spring}>
-              <Link href="/app" onClick={() => close(false)} className="v-npill out">Start free demo</Link>
-              <Link href="/login" onClick={() => close(false)} className="v-npill blk">Login</Link>
+              <AnimatedCTA href="/app" onClick={() => close(false)} fullWidth>Start free demo</AnimatedCTA>
+              <AnimatedCTA href="/login" onClick={() => close(false)} fullWidth>Login</AnimatedCTA>
             </motion.div>
           </motion.nav>
         </motion.div>

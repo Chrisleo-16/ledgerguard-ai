@@ -1,8 +1,10 @@
 "use client";
+import { AnimatedCheckbox } from "@/components/animated-checkbox";
 import { Flag } from "@/components/flag";
 import { useEffect, useMemo, useState } from "react";
 import { api, post, Invoice, money, feeLabel } from "@/lib/api";
 import { Badge, Kpi, KpiSkeleton, PageHead, DemoPanel, STATUS_LABEL, AiRationale, Notice, errNote, type Note } from "@/components/ui";
+import { useToast } from "@/components/toast";
 import { Button, Card, CardBody, Skeleton } from "@heroui/react";
 import { Icon, IconTile } from "@/components/icons";
 import { AgGridReact, amountFmt, COUNTRY, useIsMobile } from "@/components/grid";
@@ -11,7 +13,7 @@ const OPEN = ["sent", "due_soon", "due", "overdue_3", "overdue_7"];
 export default function InvoicesPage() {
   const [invs, setInvs] = useState<Invoice[]>([]); const [rems, setRems] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]); const [sum, setSum] = useState<any>(null);
-  const [note, setNote] = useState<Note>(null); const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<Note>(null); const toast = useToast(); const [busy, setBusy] = useState(false);
   const [showNew, setShowNew] = useState(false); const [showAll, setShowAll] = useState(false); const [simId, setSimId] = useState(0);
   const due0 = new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10);
   const [form, setForm] = useState({ client_id: 1, description: "Landing page redesign", amount: 1800, currency: "USD", due_date: due0 });
@@ -20,8 +22,8 @@ export default function InvoicesPage() {
     setInvs(i); setRems(r); setClients(c); setSum(s);
   };
   useEffect(() => { load().catch(e => setNote(errNote(e))); }, []);
-  const act = async (f: () => Promise<any>, ok: (r: any) => string) => {
-    setBusy(true); try { const r = await f(); setNote({ t: ok(r) }); await load(); } catch (e) { setNote(errNote(e)); } finally { setBusy(false); }
+  const act = async (o: { loading: string; success: string }, f: () => Promise<any>, ok: (r: any) => string) => {
+    setBusy(true); try { const r = await toast.run(f, { ...o, message: ok }); if (r !== undefined) await load(); } catch {} finally { setBusy(false); }
   };
   const invById = useMemo(() => Object.fromEntries(invs.map(i => [i.id, i])), [invs]);
   const openInvs = invs.filter(i => OPEN.includes(i.status));
@@ -40,15 +42,15 @@ export default function InvoicesPage() {
     { field: "status", headerName: "Status", width: 120, cellRenderer: (p: any) => <Badge s={p.value} /> },
     { headerName: "", colId: "actions", width: 168, sortable: false, resizable: false, cellRenderer: (p: any) => {
         const i: Invoice = p.data;
-        if (i.status === "draft") return <Button color="primary" size="sm" radius="full" isDisabled={busy} onPress={() => act(() => post(`/api/invoices/${i.id}/send`), r => `Sent ${r.number} via PayPal`)}>Send via PayPal</Button>;
-        if (OPEN.includes(i.status)) return <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" isDisabled={busy} onPress={() => act(() => post(`/api/invoices/${i.id}/reminders`), r => `AI drafted a ${r.tone} reminder for ${i.number}. You'll find it under Reminder drafts.`)}><Icon n="ai" size={14} /> Draft reminder</Button>;
+        if (i.status === "draft") return <Button color="primary" size="sm" radius="full" isDisabled={busy} onPress={() => act({ loading: "Sending the invoice…", success: "Invoice sent" }, () => post(`/api/invoices/${i.id}/send`), r => `Sent ${r.number} via PayPal`)}>Send via PayPal</Button>;
+        if (OPEN.includes(i.status)) return <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" isDisabled={busy} onPress={() => act({ loading: "AI is drafting the reminder…", success: "Reminder drafted" }, () => post(`/api/invoices/${i.id}/reminders`), r => `AI drafted a ${r.tone} reminder for ${i.number}. You'll find it under Reminder drafts.`)}><Icon n="ai" size={14} /> Draft reminder</Button>;
         return null; } },
   ] as any, [busy, mobile]);
 
   return (<>
     <PageHead icon="invoices" title="Invoices" sub="Every PayPal invoice, its status, and AI-drafted payment reminders. You approve every reminder before it goes anywhere."
       right={<div className="row">
-        <Button variant="bordered" className="bg-content1 border-default-200" size="md" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.checked} checked, ${r.paid.length} newly paid, ${r.new_disputes.length} new disputes.${r.errors.length ? ` ${r.errors.length} item${r.errors.length > 1 ? "s" : ""} couldn't be checked right now. ${r.errors[0].message}` : ""}`)}><Icon n="sync" /> Sync with PayPal</Button>
+        <Button variant="bordered" className="bg-content1 border-default-200" size="md" radius="full" isDisabled={busy} onPress={() => act({ loading: "Syncing with PayPal…", success: "Sync done" }, () => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.checked} checked, ${r.paid.length} newly paid, ${r.new_disputes.length} new disputes.${r.errors.length ? ` ${r.errors.length} item${r.errors.length > 1 ? "s" : ""} couldn't be checked right now. ${r.errors[0].message}` : ""}`)}><Icon n="sync" /> Sync with PayPal</Button>
         <Button color="primary" size="md" radius="full" onPress={() => setShowNew(!showNew)}>{showNew ? <><Icon n="close" /> Close</> : <><Icon n="add" /> New invoice</>}</Button></div>} />
 
     {!sum && <div className="kpis" aria-busy="true">{[0, 1, 2, 3].map(i => <KpiSkeleton key={i} />)}</div>}
@@ -69,19 +71,19 @@ export default function InvoicesPage() {
         <label className="field">Amount<input type="number" style={{ width: 120 }} value={form.amount} onChange={e => setForm({ ...form, amount: +e.target.value })} /></label>
         <label className="field">Currency<select value={form.currency} onChange={e => setForm({ ...form, currency: e.target.value })}>{["USD", "EUR", "GBP"].map(c => <option key={c}>{c}</option>)}</select></label>
         <label className="field">Due date<input type="date" value={form.due_date} onChange={e => setForm({ ...form, due_date: e.target.value })} /></label>
-        <Button color="primary" size="md" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/invoices", { ...form, send: true }), r => { setShowNew(false); return `Invoice ${r.number} created and sent (PayPal ${r.paypal_id}).`; })}>Create & send</Button>
+        <Button color="primary" size="md" radius="full" isDisabled={busy} onPress={() => act({ loading: "Creating the invoice…", success: "Invoice created and sent" }, () => post("/api/invoices", { ...form, send: true }), r => { setShowNew(false); return `Invoice ${r.number} created and sent (PayPal ${r.paypal_id}).`; })}>Create & send</Button>
       </div></div>}
 
     <DemoPanel>
       <div className="group"><span>Time travel</span>
-        {[1, 3, 7].map(d => <button key={d} className="btn ghost sm" disabled={busy} onClick={() => act(() => post("/api/dev/clock/advance", { days: d }), r => `Clock moved to ${r.today}. ${r.changes.length ? r.changes.map((c: any) => `${c.invoice}: ${STATUS_LABEL[c.from]} → ${STATUS_LABEL[c.to]}`).join(" · ") : "No status changes."}`)}>+{d} day{d > 1 ? "s" : ""}</button>)}
-        <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/dev/clock/reset"), r => `Clock reset to ${r.today}.`)}>Reset to today</Button></div>
+        {[1, 3, 7].map(d => <button key={d} className="btn ghost sm" disabled={busy} onClick={() => act({ loading: "Moving the demo clock…", success: "Clock moved" }, () => post("/api/dev/clock/advance", { days: d }), r => `Clock moved to ${r.today}. ${r.changes.length ? r.changes.map((c: any) => `${c.invoice}: ${STATUS_LABEL[c.from]} → ${STATUS_LABEL[c.to]}`).join(" · ") : "No status changes."}`)}>+{d} day{d > 1 ? "s" : ""}</button>)}
+        <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" isDisabled={busy} onPress={() => act({ loading: "Resetting the demo clock…", success: "Clock reset" }, () => post("/api/dev/clock/reset"), r => `Clock reset to ${r.today}.`)}>Reset to today</Button></div>
       <div className="group"><span>AI agent</span>
-        <Button color="primary" size="sm" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/reminders/run"), r => `Chaser agent reviewed open invoices and drafted ${r.drafted.length} reminder(s).`)}><Icon n="ai" size={14} /> Run chaser on all due/overdue invoices</Button></div>
+        <Button color="primary" size="sm" radius="full" isDisabled={busy} onPress={() => act({ loading: "Chaser agent is reviewing invoices…", success: "Chaser run done" }, () => post("/api/reminders/run"), r => `Chaser agent reviewed open invoices and drafted ${r.drafted.length} reminder(s).`)}><Icon n="ai" size={14} /> Run chaser on all due/overdue invoices</Button></div>
       <div className="group"><span>Payment webhook</span>
         <select value={simId} onChange={e => setSimId(+e.target.value)}><option value={0}>Choose an open invoice…</option>
           {openInvs.map(i => <option key={i.id} value={i.id}>{i.number} · {i.client} · {money(i.amount, i.currency)}</option>)}</select>
-        <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" isDisabled={busy || !simId} onPress={() => act(() => post("/api/dev/simulate/payment", { invoice_id: simId }), r => { setSimId(0); return `INVOICING.INVOICE.PAID received → ${r.result.invoice} marked paid, ${r.result.reminders_cancelled ?? 0} pending reminder(s) cancelled.`; })}>Simulate “invoice paid”</Button>
+        <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" isDisabled={busy || !simId} onPress={() => act({ loading: "Simulating the payment…", success: "Payment received" }, () => post("/api/dev/simulate/payment", { invoice_id: simId }), r => { setSimId(0); return `INVOICING.INVOICE.PAID received → ${r.result.invoice} marked paid, ${r.result.reminders_cancelled ?? 0} pending reminder(s) cancelled.`; })}>Simulate “invoice paid”</Button>
         <span className="muted" style={{ width: "auto" }}>Mock mode only. In sandbox, pay the invoice and use Sync.</span></div>
     </DemoPanel>
 
@@ -92,7 +94,7 @@ export default function InvoicesPage() {
       </div></div>
 
     <div className="card"><div className="card-head"><h2><Icon n="mail" />Reminder drafts <span className="muted">· {rems.filter(r => r.status === "draft").length} waiting for review</span></h2>
-      <label className="muted row" style={{ gap: 6 }}><input type="checkbox" checked={showAll} onChange={e => setShowAll(e.target.checked)} />Show cancelled</label></div>
+      <AnimatedCheckbox className="muted" checked={showAll} onChange={setShowAll}>Show cancelled</AnimatedCheckbox></div>
       {visibleRems.length === 0 ? <div className="empty-inline"><IconTile n="mail" big />
         <div><b>No drafts waiting.</b> When an invoice is due or overdue, click <b><Icon n="ai" size={14} /> Draft reminder</b>. The agent looks at the client's country, how fast they've paid before and the tone of their recent messages, then writes a reminder for you to review. Nothing is sent automatically.</div></div>
       : <>
@@ -114,8 +116,8 @@ export default function InvoicesPage() {
           {r.reasoning.draft_source && <div className="muted" style={{ marginTop: 6 }}>Written by {r.reasoning.draft_source === "template" ? "template (fallback)" : r.reasoning.draft_source}</div>}
           {r.late_fee > 0 && <div className="muted">Optional late fee mentioned: {feeLabel(r, inv?.currency)}</div>}
           {r.status === "draft" && <div className="row" style={{ marginTop: 8 }}>
-            <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" onPress={() => { navigator.clipboard?.writeText(`${r.subject}\n\n${r.body}`); setNote({ t: "Reminder copied. Paste it into your email." }); }}><Icon n="copy" size={14} /> Copy text</Button>
-            <Button color="success" size="sm" radius="full" onPress={() => act(() => post(`/api/reminders/${r.id}/approve`), () => "Reminder approved. LedgerGuard never sends it for you.")}><Icon n="tick" size={14} /> Approve</Button></div>}
+            <Button variant="bordered" className="bg-content1 border-default-200" size="sm" radius="full" onPress={() => { navigator.clipboard?.writeText(`${r.subject}\n\n${r.body}`); toast.show({ variant: "success", title: "Reminder copied", message: "Paste it into your email." }); }}><Icon n="copy" size={14} /> Copy text</Button>
+            <Button color="success" size="sm" radius="full" onPress={() => act({ loading: "Approving the reminder…", success: "Reminder approved" }, () => post(`/api/reminders/${r.id}/approve`), () => "Reminder approved. LedgerGuard never sends it for you.")}><Icon n="tick" size={14} /> Approve</Button></div>}
         </CardBody></Card>); })}</div></>}
     </div>
   </>);

@@ -1,4 +1,5 @@
 "use client";
+import { Flag } from "@/components/flag";
 import { useEffect, useMemo, useState } from "react";
 import { api, post, Invoice } from "@/lib/api";
 import { Badge, PageHead, Thinking } from "@/components/ui";
@@ -13,7 +14,7 @@ export default function LedgerPage() {
   const cols = useMemo(() => [
     { field: "number", headerName: "Invoice", width: mobile ? 140 : 172, minWidth: mobile ? 140 : 172, pinned: mobile ? "left" : undefined },
     { field: "client", headerName: "Client", flex: 1, minWidth: 120, wrapText: true, autoHeight: true,
-      cellRenderer: (p: any) => <span>{p.value} <span className="cell-sub">{COUNTRY[p.data.country] || p.data.country}</span></span> },
+      cellRenderer: (p: any) => <span>{p.value} <span className="cell-sub cell-flag"><Flag code={p.data.country || ""} size={14} />{COUNTRY[p.data.country] || p.data.country}</span></span> },
     { field: "description", headerName: "Description", hide: mobile, flex: 1.3, minWidth: 140, wrapText: true, autoHeight: true },
     { field: "amount", headerName: "Amount", width: 125, type: "rightAligned", cellRenderer: (p: any) => <span><span className="cell-sub">{p.data.currency}</span> {amountFmt(p)}</span> },
     { field: "status", headerName: "Status", width: 120, cellRenderer: (p: any) => <Badge s={p.value} /> },

@@ -5,7 +5,7 @@
 .v-logo-m{width:30px;height:30px;border-radius:50%;background:#1a1a1a;color:#c6f432;display:grid;place-items:center}
 .v-pillnav{display:flex;gap:2px;padding:4px;border:1px solid #e4e4e4;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .v-pillnav a{font-size:13px;color:#4a4a4a;text-decoration:none;padding:6px 14px;border-radius:999px;white-space:nowrap}
-.v-pillnav a:hover{color:#1a1a1a;background:#f2f2f2}.v-pillnav a.on{background:#f0f0f0;color:#1a1a1a;font-weight:500;box-shadow:inset 0 0 0 1px #e2e2e2}
+.v-pillnav a:hover{color:#1a1a1a;background:#f2f2f2}.v-pillnav a.on{color:#1a1a1a;font-weight:500;background:transparent}
 .v-nav-r{display:flex;gap:8px}.v-npill{font-size:13px;font-weight:500;padding:8px 16px;border-radius:999px;text-decoration:none;white-space:nowrap}
 .v-npill.out{border:1.5px solid #1a1a1a;color:#1a1a1a;background:#fff}.v-npill.blk{background:#1a1a1a;color:#fff}
 .v-npill:focus-visible,.v-pillnav a:focus-visible{outline:2px solid #1a1a1a;outline-offset:2px}
@@ -83,7 +83,7 @@
 .v-markets .mq{overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);margin-bottom:10px}
 .mq-t{display:flex;gap:10px;width:max-content;animation:mq 40s linear infinite}.mq.rev .mq-t{animation-direction:reverse}
 @keyframes mq{to{transform:translateX(-50%)}}
-.mpill{display:inline-flex;gap:8px;align-items:center;background:#fff;border-radius:999px;padding:7px 16px 7px 8px;font-size:12.5px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 0 0 1px #ececec}.mpill span{font-size:16px}
+.mpill{display:inline-flex;gap:8px;align-items:center;background:#fff;border-radius:999px;padding:7px 16px 7px 8px;font-size:12.5px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 0 0 1px #ececec}
 .v-markets .v-wrap{margin-top:40px}
 @media (prefers-reduced-motion:reduce){.mq-t,.flag,.vfloat{animation:none}}
 /* why-choose cards */
@@ -161,3 +161,15 @@
 @media (max-width:960px){.fl{left:2%}.fr{right:2%}}
 @media (max-width:760px){.fl{left:8px;top:auto;bottom:140px}.fr{right:8px;top:24px}}
 .v-logo{min-height:32px}
+
+/* v12: sticky frosted nav + scroll-spy pill + smooth anchors */
+.v-nav{transition:box-shadow .25s ease,background-color .25s ease;-webkit-backdrop-filter:blur(12px)}
+.v-nav.scrolled{background:rgba(250,250,250,.78);box-shadow:0 1px 0 rgba(0,0,0,.06),0 8px 24px -12px rgba(0,0,0,.18)}
+.v-pillnav a{position:relative}
+.v-pill-bg{position:absolute;inset:0;border-radius:999px;background:#f0f0f0;box-shadow:inset 0 0 0 1px #e2e2e2}
+.v-pill-t{position:relative}
+html{scroll-padding-top:84px}
+#features,#workflows,#faq{scroll-margin-top:84px}
+#features:focus,#workflows:focus,#faq:focus{outline:none}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+.flag-i{border-radius:50%;flex:none;display:inline-block;vertical-align:middle;box-shadow:0 0 0 1px rgba(0,0,0,.08)}

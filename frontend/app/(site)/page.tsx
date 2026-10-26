@@ -1,4 +1,5 @@
 "use client";
+import { Flag } from "@/components/flag";
 import Link from "next/link";
 import { Icon, IcName } from "@/components/icons";
 import { Accordion, AccordionItem, Button, Chip } from "@heroui/react";
@@ -23,7 +24,7 @@ const PhoneHero = () => <Phone className="ph-hero">
   <div className="hero-btn"><span><Icon n="flash" size={30} /></span></div>
   <p className="ph-cap">Tap to draft reminders</p>
 </Phone>;
-const MARKETS: [string, string][] = [["🇰🇪", "Kenya"], ["🇳🇬", "Nigeria"], ["🇬🇭", "Ghana"], ["🇺🇬", "Uganda"], ["🇿🇦", "South Africa"], ["🇺🇸", "United States"], ["🇬🇧", "United Kingdom"], ["🇩🇪", "Germany"], ["🇮🇳", "India"], ["🇨🇦", "Canada"], ["🇳🇱", "Netherlands"], ["🇲🇺", "Mauritius"]];
+const MARKETS: [string, string][] = [["KE", "Kenya"], ["NG", "Nigeria"], ["GH", "Ghana"], ["UG", "Uganda"], ["ZA", "South Africa"], ["US", "United States"], ["GB", "United Kingdom"], ["DE", "Germany"], ["IN", "India"], ["CA", "Canada"], ["NL", "Netherlands"], ["MU", "Mauritius"]];
 
 /* Section 3 phone: reminder draft */
 const PhoneReminder = () => <Phone className="ph-solo">
@@ -55,7 +56,7 @@ export default function Landing() {
       <div className="v-row c"><Button as={Link} href="/app" radius="full" className="v-black sm">Get Started</Button><Button as={Link} href="/app" radius="full" variant="light" className="v-ghost" startContent={<Icon n="arrowUpRight" size={15} />}>View demo</Button></div>
       <div className="v-stage" aria-hidden="true">
         <div className="v-map" />
-        <span className="flag f1">🇺🇸</span><span className="flag f2">🇩🇪</span><span className="flag f3">🇬🇧</span><span className="flag f4">🇰🇪</span>
+        <span className="flag f1"><Flag code="US" size={22} /></span><span className="flag f2"><Flag code="DE" size={22} /></span><span className="flag f3"><Flag code="GB" size={22} /></span><span className="flag f4"><Flag code="KE" size={22} /></span>
         <PhoneHero />
         <div className="vfloat fl"><span className="fi-ic ok"><Icon n="received" size={15} /></span><div><b>Invoice paid</b><small>Lumen Studio Ltd · GBP 950.00</small></div></div>
         <div className="vfloat fr"><span className="fi-ic warn"><Icon n="alert" size={15} /></span><div><b>Dispute opened</b><small>Acme Robotics · USD 3,200.00</small></div><span className="ph-pill lime">Package ready</span></div>
@@ -68,7 +69,7 @@ export default function Landing() {
       <div className="bento3">
         <div className="bc"><h3>Approval-First Policy</h3><p>Reminders stay drafts and evidence waits for your click. Nothing goes out on its own.</p>
           <div className="shield-ill" aria-hidden="true"><span className="sh"><Icon n="disputes" size={44} stroke={1.6} /></span><span className="sh-dot"><Icon n="tick" size={12} /></span></div></div>
-        <div className="bc globe-c"><div className="globe" aria-hidden="true" /><div className="chip-f" aria-hidden="true"><span>🇩🇪</span><div><b>Brightwave GmbH</b><small>EUR 6,500.00 open</small></div><Icon n="arrow" size={12} /></div>
+        <div className="bc globe-c"><div className="globe" aria-hidden="true" /><div className="chip-f" aria-hidden="true"><Flag code="DE" size={20} /><div><b>Brightwave GmbH</b><small>EUR 6,500.00 open</small></div><Icon n="arrow" size={12} /></div>
           <h3>Multi-Currency, Anytime</h3><p>USD, EUR and GBP invoices are tracked and totalled per currency, never mixed.</p></div>
         <div className="bc"><h3>Cash-Flow Health</h3><p>See how much of your open USD is past due at a glance.</p>
           <div className="gauge big"><svg viewBox="0 0 120 70" aria-hidden="true"><path d="M10 64a50 50 0 0 1 100 0" className="g-bg" /><path d="M10 64a50 50 0 0 1 100 0" className="g-fg" pathLength="100" strokeDasharray="83 100" /></svg><div className="g-val"><b>83%</b><small>past due · USD 5,450 of 6,600</small></div></div></div>
@@ -76,7 +77,7 @@ export default function Landing() {
 
     {/* marquee */}
     <section className="v-markets">
-      {[MARKETS, [...MARKETS].reverse()].map((row, r) => <div key={r} className={`mq ${r ? "rev" : ""}`} aria-hidden="true"><div className="mq-t">{[...row, ...row].map(([f, c], i) => <span key={i} className="mpill"><span>{f}</span>{c}</span>)}</div></div>)}
+      {[MARKETS, [...MARKETS].reverse()].map((row, r) => <div key={r} className={`mq ${r ? "rev" : ""}`} aria-hidden="true"><div className="mq-t">{[...row, ...row].map(([f, c], i) => <span key={i} className="mpill"><Flag code={f} size={18} />{c}</span>)}</div></div>)}
       <div className="v-wrap"><Eyebrow t="Global coverage" />
         <h2 className="v-h2 c">Paid From <Chipi n="coins" /> 200+ Markets</h2>
         <p className="v-p c">PayPal works in more than 200 markets, and LedgerGuard follows your invoices in whatever currency your clients pay.</p>

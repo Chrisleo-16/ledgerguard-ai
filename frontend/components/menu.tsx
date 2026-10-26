@@ -18,7 +18,7 @@ function Burger({ open, reduce }: { open: boolean; reduce: boolean }) {
 }
 
 /** Mobile/tablet menu (<960px): animated burger, blurred backdrop, drop-down panel with staggered links, focus trap. */
-export function MobileMenu({ links, title = "Menu" }: { links: MenuLink[]; title?: string }) {
+export function MobileMenu({ links, title = "Menu", active, onNavigate }: { links: MenuLink[]; title?: string; active?: string; onNavigate?: (href: string, e: React.MouseEvent) => void }) {
   const [open, setOpen] = useState(false);
   const reduce = !!useReducedMotion();
   const path = usePathname();
@@ -56,7 +56,7 @@ export function MobileMenu({ links, title = "Menu" }: { links: MenuLink[]; title
           transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 32 }}>
           <motion.nav aria-label={title} initial="h" animate="s" exit="h" variants={{ s: { transition: { staggerChildren: 0.05 * d, delayChildren: 0.06 * d } }, h: {} }}>
             {links.map(l => <motion.div key={l.href} variants={{ h: { opacity: 0, y: 10 * d }, s: { opacity: 1, y: 0 } }} transition={reduce ? { duration: 0 } : spring}>
-              <Link href={l.href} onClick={() => close(false)} className={`mm-link ${path === l.href ? "on" : ""}`} aria-current={path === l.href ? "page" : undefined}>
+              <Link href={l.href} onClick={e => { close(false); onNavigate?.(l.href, e); }} className={`mm-link ${(active ?? path) === l.href ? "on" : ""}`} aria-current={(active ?? path) === l.href ? (active ? "location" : "page") : undefined}>
                 <span>{l.label}</span>{l.badge != null ? <em>{l.badge}</em> : <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>}
               </Link></motion.div>)}
             <motion.div className="mm-cta" variants={{ h: { opacity: 0, y: 10 * d }, s: { opacity: 1, y: 0 } }} transition={reduce ? { duration: 0 } : spring}>

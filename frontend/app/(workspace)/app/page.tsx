@@ -1,4 +1,5 @@
 "use client";
+import { Flag } from "@/components/flag";
 import { useEffect, useMemo, useState } from "react";
 import { api, post, Invoice, money, feeLabel } from "@/lib/api";
 import { Badge, Kpi, KpiSkeleton, PageHead, DemoPanel, STATUS_LABEL, AiRationale } from "@/components/ui";
@@ -33,7 +34,7 @@ export default function InvoicesPage() {
   const cols = useMemo(() => [
     { field: "number", headerName: "Invoice", width: mobile ? 150 : 210, minWidth: mobile ? 150 : 210, pinned: mobile ? "left" : undefined, cellRenderer: (p: any) => <span className="cell-lead"><IconTile n="invoices" size={13} />{p.value}</span> },
     { field: "client", headerName: "Client", flex: 1, minWidth: 150, wrapText: true, autoHeight: true,
-      cellRenderer: (p: any) => <span>{p.value} <span className="cell-sub">{COUNTRY[p.data.country] || p.data.country}</span></span> },
+      cellRenderer: (p: any) => <span>{p.value} <span className="cell-sub cell-flag"><Flag code={p.data.country || ""} size={14} />{COUNTRY[p.data.country] || p.data.country}</span></span> },
     { field: "amount", headerName: "Amount", width: 130, type: "rightAligned", cellRenderer: (p: any) => <span><span className="cell-sub">{p.data.currency}</span> {amountFmt(p)}</span> },
     { field: "due_date", headerName: "Due date", width: 178, cellRenderer: (p: any) => <span>{p.value}{p.data.days_overdue > 0 && <span className="cell-sub"> · {p.data.days_overdue}d late</span>}</span> },
     { field: "status", headerName: "Status", width: 120, cellRenderer: (p: any) => <Badge s={p.value} /> },

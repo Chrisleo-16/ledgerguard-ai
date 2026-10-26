@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
+import { MobileMenu } from "@/components/menu";
 import { Button, Tooltip } from "@heroui/react";
 export const GITHUB = "https://github.com/Chrisleo-16/ledgerguard-ai";
 const NAV: [string, string][] = [["Home", "/"], ["Features", "/#features"], ["How it works", "/how-it-works"], ["Workflows", "/#workflows"], ["FAQ", "/#faq"]];
@@ -11,7 +12,7 @@ export function SiteHeader() {
   return <header className="v-nav"><div className="v-nav-in">
     <Link href="/" className="v-logo" aria-label="LedgerGuard AI home"><span className="v-logo-m"><Icon n="logo" size={16} /></span>LedgerGuard</Link>
     <nav className="v-pillnav" aria-label="Main">{NAV.map(([t, h]) => <Link key={t} href={h} className={(h === path ? "on" : "")} aria-current={h === path ? "page" : undefined}>{t}</Link>)}</nav>
-    <div className="v-nav-r"><Link href="/app" className="v-npill out">Start free demo</Link><Link href="/login" className="v-npill blk">Login</Link></div>
+    <div className="v-nav-r"><Link href="/app" className="v-npill out">Start free demo</Link><Link href="/login" className="v-npill blk">Login</Link><MobileMenu links={NAV.map(([label, href]) => ({ label, href }))} /></div>
   </div></header>;
 }
 export function SiteFooter() {

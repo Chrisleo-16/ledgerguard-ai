@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Avatar, Button, Chip, Divider, Drawer, DrawerBody, DrawerContent, Listbox, ListboxItem, Tooltip } from "@heroui/react";
+import { MobileMenu } from "@/components/menu";
+import { Avatar, Button, Chip, Divider, Listbox, ListboxItem, Tooltip } from "@heroui/react";
 import { api } from "@/lib/api";
 import { Icon, IcName } from "@/components/icons";
 const LINKS: [string, string, IcName][] = [["/app", "Invoices", "invoices"], ["/disputes", "Disputes", "disputes"], ["/ledger", "Ask the ledger", "ledger"]];
@@ -41,10 +42,8 @@ export default function Nav() {
   }, []);
   const title = LINKS.find(([href]) => path.startsWith(href))?.[1] || "LedgerGuard";
   return <>
-    <div className="mtop"><Button isIconOnly variant="bordered" radius="lg" aria-label="Open menu" onPress={() => setOpen(true)} className="bg-content1 border-default-200"><Icon n="menu" size={18} /></Button>
-      <b>{title}</b><Link href="/" className="logo-mark" aria-label="LedgerGuard AI home"><Icon n="logo" size={15} /></Link></div>
+    <div className="mtop"><Link href="/" className="logo-mark" aria-label="LedgerGuard AI home"><Icon n="logo" size={15} /></Link>
+      <b>{title}</b><MobileMenu title="Workspace menu" links={[...LINKS.map(([href, label]: any) => ({ href, label, badge: href === "/app" ? counts?.overdue?.count : href === "/disputes" ? counts?.open_disputes?.count : undefined })), { href: "/", label: "Home" }, { href: "/how-it-works", label: "How it works" }]} /></div>
     <aside className="sidebar"><SideContent path={path} h={h} down={down} counts={counts} /></aside>
-    <Drawer isOpen={open} onOpenChange={setOpen} placement="left" size="xs" radius="none" classNames={{ base: "max-w-[300px]" }}>
-      <DrawerContent><DrawerBody className="drawer-side"><SideContent path={path} h={h} down={down} counts={counts} /></DrawerBody></DrawerContent></Drawer>
   </>;
 }

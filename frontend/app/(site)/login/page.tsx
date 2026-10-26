@@ -9,7 +9,7 @@ export default function Login() {
   return <section className="site-wrap login-wrap"><Card shadow="lg" radius="lg" className="login w-full max-w-[420px]">
     <CardHeader className="flex-col items-start gap-3 px-7 pt-7">
       <div className="row" style={{ justifyContent: "space-between", width: "100%" }}><span className="logo-mark big"><Icon n="logo" size={20} /></span>
-        <Chip size="sm" variant="flat" color="warning" radius="full">Demo login</Chip></div>
+        <Chip size="sm" variant="flat" color="warning" radius="full" classNames={{ content: "text-[#5c3c00] font-medium" }}>Demo login</Chip></div>
       <h1>Log in to LedgerGuard</h1></CardHeader>
     <CardBody className="gap-4 px-7 pb-7">
       <p className="notice" role="note"><b>Demo login.</b> There is no real authentication. No passwords or personal data are collected or stored. Anyone, including judges, can continue.</p>

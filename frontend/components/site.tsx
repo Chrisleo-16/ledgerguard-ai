@@ -1,19 +1,21 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
-import { Button, Navbar, NavbarBrand, NavbarContent, NavbarItem, Tooltip } from "@heroui/react";
+import { Button, Tooltip } from "@heroui/react";
 export const GITHUB = "https://github.com/Chrisleo-16/ledgerguard-ai";
+const NAV: [string, string][] = [["Home", "/"], ["Features", "/#features"], ["How it works", "/how-it-works"], ["Workflows", "/#workflows"], ["FAQ", "/#faq"]];
 export function SiteHeader() {
-  return <Navbar maxWidth="xl" isBlurred isBordered classNames={{ base: "site-nav-hero bg-background/80", wrapper: "px-6 max-w-[1120px]" }} height="60px">
-    <NavbarBrand><Link href="/" className="logo" aria-label="LedgerGuard AI home"><span className="logo-mark"><Icon n="logo" size={15} /></span>LedgerGuard</Link></NavbarBrand>
-    <NavbarContent justify="end" className="gap-1 sm:gap-2">
-      <NavbarItem><Link href="/how-it-works" className="hnav">How it works</Link></NavbarItem>
-      <NavbarItem className="hidden sm:flex"><a href={GITHUB} rel="noopener" className="hnav">GitHub</a></NavbarItem>
-      <NavbarItem><Button as={Link} href="/app" color="primary" radius="full" size="sm" className="font-medium px-4 h-9">Open demo</Button></NavbarItem>
-    </NavbarContent></Navbar>;
+  const path = usePathname();
+  return <header className="v-nav"><div className="v-nav-in">
+    <Link href="/" className="v-logo" aria-label="LedgerGuard AI home"><span className="v-logo-m"><Icon n="logo" size={16} /></span>LedgerGuard</Link>
+    <nav className="v-pillnav" aria-label="Main">{NAV.map(([t, h]) => <Link key={t} href={h} className={(h === path ? "on" : "")} aria-current={h === path ? "page" : undefined}>{t}</Link>)}</nav>
+    <div className="v-nav-r"><Link href="/app" className="v-npill out">Start free demo</Link><Link href="/login" className="v-npill blk">Login</Link></div>
+  </div></header>;
 }
 export function SiteFooter() {
+  if (usePathname() === "/") return null; // the landing renders its own footer
   return <footer className="site-foot"><div className="site-wrap foot-grid">
     <div><Link href="/" className="logo"><span className="logo-mark"><Icon n="logo" size={15} /></span>LedgerGuard</Link>
       <p className="muted">An AI copilot for freelancers on PayPal. Built for the PayPal AI Hackathon 2026.</p><Button as={Link} href="/app" color="primary" radius="full" size="sm" className="font-medium">Open demo</Button></div>

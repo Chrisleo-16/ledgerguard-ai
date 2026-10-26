@@ -461,3 +461,5 @@ ul[role=listbox],ul[data-slot=list],[data-slot=base]>ul{padding:0;margin:0;list-
 .nav-item,.nav-item *{text-decoration:none;color:inherit}
 input[data-slot=input]{border:0!important;padding:0!important;background:transparent!important;border-radius:0!important;outline:none!important;box-shadow:none!important;min-width:0}
 .demo-item{padding:0 14px!important}.demo-acc{padding:0!important}
+.ask-wrap{padding-left:16px!important}.ask-wrap input[data-slot=input]{padding-left:10px!important}
+.site-foot a.z-0,.site-foot a[data-slot],.site-foot .site-wrap a.bg-primary{color:#fff!important}

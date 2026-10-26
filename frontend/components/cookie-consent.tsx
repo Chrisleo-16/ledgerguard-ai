@@ -12,13 +12,13 @@ function CookieArt() {
     <defs><mask id="cc-bite"><rect width="120" height="120" fill="#fff" />
       <circle cx="104" cy="22" r="20" fill="#000" /><circle cx="84" cy="10" r="11" fill="#000" /><circle cx="112" cy="44" r="11" fill="#000" /></mask></defs>
     <g mask="url(#cc-bite)">
-      <circle cx="60" cy="62" r="50" fill="#9C6750" />
-      <circle cx="58" cy="59" r="45" fill="#EAB789" />
-      <circle cx="40" cy="44" r="6" fill="#634647" /><circle cx="66" cy="36" r="4.5" fill="#634647" />
-      <circle cx="32" cy="72" r="5" fill="#634647" /><circle cx="58" cy="64" r="6.5" fill="#634647" />
-      <circle cx="82" cy="58" r="4.5" fill="#634647" /><circle cx="50" cy="90" r="4.5" fill="#634647" />
-      <circle cx="76" cy="84" r="6" fill="#634647" /><circle cx="90" cy="76" r="2.5" fill="#9C6750" />
-      <circle cx="24" cy="56" r="2.5" fill="#9C6750" /><circle cx="64" cy="48" r="2" fill="#9C6750" />
+      <circle cx="60" cy="62" r="50" fill="#3d5a00" />
+      <circle cx="58" cy="59" r="45" fill="#c6f432" />
+      <circle cx="40" cy="44" r="6" fill="#2f4600" /><circle cx="66" cy="36" r="4.5" fill="#2f4600" />
+      <circle cx="32" cy="72" r="5" fill="#2f4600" /><circle cx="58" cy="64" r="6.5" fill="#2f4600" />
+      <circle cx="82" cy="58" r="4.5" fill="#2f4600" /><circle cx="50" cy="90" r="4.5" fill="#2f4600" />
+      <circle cx="76" cy="84" r="6" fill="#2f4600" /><circle cx="90" cy="76" r="2.5" fill="#3d5a00" />
+      <circle cx="24" cy="56" r="2.5" fill="#3d5a00" /><circle cx="64" cy="48" r="2" fill="#3d5a00" />
     </g>
     <path d="M86 4a11 11 0 0 0 0 0M80 12" fill="none" />
   </svg>;

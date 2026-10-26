@@ -533,12 +533,12 @@ input[data-slot=input]{border:0!important;padding:0!important;background:transpa
 .cc-art{position:absolute;left:50%;top:-52px;width:104px;height:104px;transform:translateX(-50%);filter:drop-shadow(0 4px 6px rgba(99,70,71,.25))}
 .cc-h{margin:0 0 6px;font-size:15px;font-weight:600;color:#18181b}
 .cc-p{margin:0;font-size:13px;line-height:1.5;text-align:justify;hyphens:auto}
-.cc-p a{color:#634647;text-decoration:underline;font-weight:500}.cc-more{margin-top:8px}
+.cc-p a{color:#3d5a00;text-decoration:underline;font-weight:500}.cc-more{margin-top:8px}
 .cc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
 .cc-opt{border:0;background:none;padding:4px 0;font:inherit;font-size:13px;color:#52525b;cursor:pointer}.cc-opt:hover{text-decoration:underline}
-.cc-ok{border:0;border-radius:999px;padding:8px 20px;font:inherit;font-size:13px;font-weight:600;background:#ddad81;color:#3f2a2b;cursor:pointer;transition:background .2s,color .2s}
-.cc-ok:hover{background:#634647;color:#ddad81}
-.cc a:focus-visible,.cc button:focus-visible{outline:2px solid #634647;outline-offset:2px;border-radius:6px}.cc-ok:focus-visible{border-radius:999px}
+.cc-ok{border:0;border-radius:999px;padding:8px 20px;font:inherit;font-size:13px;font-weight:600;background:#c6f432;color:#111;cursor:pointer;transition:background .2s,color .2s}
+.cc-ok:hover,.cc-ok:focus-visible{background:#111;color:#c6f432}.cc-p a:hover{color:#111}
+.cc a:focus-visible,.cc button:focus-visible{outline:2px solid #111;outline-offset:2px;border-radius:6px}.cc-ok:focus-visible{border-radius:999px}
 @media (max-width:640px){.cc{left:0;right:0;margin-left:auto;margin-right:auto;bottom:16px}}
 /* Animated arrow CTA — adapted from Uiverse.io by gharsh11032000 (MIT) */
 .acta{--e:cubic-bezier(.23,1,.32,1);position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box;overflow:hidden;

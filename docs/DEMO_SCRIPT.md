@@ -1,35 +1,49 @@
-# LedgerGuard AI: demo video script (2:45)
+# LedgerGuard AI: demo video script (about 2:40)
 
-**Presenter / author:** Chrisben Evans Leo · **Target length:** 2:45 (165 s) · **Voiceover:** about 400 words, a steady pace of about 145 wpm
-**Upload to:** `[YOUTUBE_URL — placeholder]` · **Links on the end card:** https://ledgerguard-web.onrender.com, https://github.com/Chrisleo-16/ledgerguard-ai
+**Presenter / author:** Chrisben Evans Leo · **Target length:** about 2:40 (under 3:00) · **Voiceover:** 336 words, about 2:15 spoken at 150 wpm, with the rest of the time for on-screen action
+**Upload to:** `[YOUTUBE_URL]` · **Links on the end card:** https://ledgerguard-web.onrender.com, https://github.com/Chrisleo-16/ledgerguard-ai
+
+> **Trademark rule:** the video and voiceover name no competitor and no third-party product or brand other than PayPal. Keep it that way when editing, and keep library, model and tool names out of the narration and on-screen text. The positioning compares against "other tools" in general.
+
+---
+
+## Positioning (say it at about 0:15 and echo it in the closing)
+
+**Key line:** *"Other tools either chase invoices or fight disputes. LedgerGuard is the only one that uses your invoice trail to win the dispute, built natively on PayPal."*
+
+1. **All three jobs in one PayPal-native app:** invoice chasing, dispute defense and a conversational ledger.
+2. **Dispute evidence from the invoice and reminder history**, not just order data.
+3. **Guardrails enforced in code** (fee caps, human approval), made for cross-border freelancers in markets like Kenya.
 
 ---
 
 ## Before you record (checklist)
 
-1. **Fresh data:** `cd backend && .venv/bin/python -m app.seed`. Then run `./run-backend.sh` and `./run-frontend.sh`, and open `http://localhost:3000/app` (the landing page is at `/`).
-2. **Mode:** record the main take in **mock mode** (`PAYPAL_MODE=mock` or no PayPal keys). The simulated payment and dispute webhooks only work in mock mode. The sidebar pill will say **"PayPal Demo (mock)"**. Leave it visible; the voiceover acknowledges it.
-3. **AI:** decide whether to record with a model (`ANTHROPIC_API_KEY`, default `LLM_MODEL=claude-sonnet-5-5`) or with the rules fallback. The sidebar shows "AI: model" or "AI: rules fallback". With Claude, the action and tone are Claude's choice within code guardrails; with the fallback, rules choose. Fee amounts, installments and ledger totals are always computed by code. Draft and statement wording also changes.
-4. **Clock:** click **Reset to today** in Demo controls. Browser at 110–125% zoom, 1920×1080, notifications off.
-5. The on-screen values below come from a dry run on fresh seed data in fallback mode. Invoice numbers use the current year, and dates are relative to the day you record.
-6. *(Optional B-roll, about 4 s, for shot 3)*: a separate take with sandbox credentials, showing **"PayPal Sandbox"** in the sidebar and the new `INV2-…` invoice in the PayPal sandbox dashboard. If you don't record this, keep shot 3 as written.
+1. **Fresh data:** `cd backend && .venv/bin/python -m app.seed`. Then run `./run-backend.sh` and `./run-frontend.sh`, and open `http://localhost:3000/`. The seed now includes two demo disputes (PP-D-SEED0001, Brightwave GmbH, not as described; PP-D-SEED0002, Harbor & Pine LLC, not received), so the Disputes page is populated without simulating a webhook.
+2. **Mode:** record in **mock mode** (`PAYPAL_MODE=mock`). The simulated payment webhook only works in mock mode. The sidebar shows **"PayPal Demo (mock)"**; leave it visible.
+3. **AI:** recording with a model or with the rules fallback both work. Fee amounts, installments and ledger totals are always computed by code.
+4. **Clock:** click **Reset to today** in Demo controls. Use 110–125% browser zoom, 1920×1080, with notifications off. Accept the privacy card before recording so it doesn't cover the toasts.
+5. **Error beat (shot 9):** stop the backend for a moment and press **Sync**, or use the recorded clip. While it waits, the app shows a "Server waking up…" loading toast, then a plain-language error toast.
+6. **Install beat:** record it in Chrome (it fires the real install prompt). On iPhone or Safari, the button explains *Tap Share → Add to Home Screen* instead.
 
 ---
 
-## Shot list
+## Shot list (rough timestamps at 150 wpm)
 
 | # | Time | On screen / action | Voiceover |
 |---|---|---|---|
-| 1 | **0:00 – 0:12** | Title card: **"LedgerGuard AI: an agentic PayPal financial-ops copilot"**, subtitle *"Chrisben Evans Leo · Nairobi, Kenya"*. Cut to the Invoices page (`/app`). | "I'm Chrisben, a developer in Nairobi. My clients are in the US and Europe. When one of them pays late or files a chargeback, it isn't an inconvenience. It's this month's rent, frozen." |
-| 2 | **0:12 – 0:22** | Slowly pan across the four KPI cards (Outstanding, Overdue, Paid this month, Open disputes), then hover the sidebar pills (*PayPal Demo (mock)*, *AI: …*, *Today …*). | "LedgerGuard AI sits on top of PayPal and handles three jobs: chasing invoices, defending disputes, and answering questions about my money. Every total here is computed per currency from real rows." |
-| 3 | **0:22 – 0:37** | Click **+ New invoice**. Client: *Acme Robotics Inc. (US)*, "Landing page redesign", USD 1800, due date **3 days from today**. Click **Create & send**. The notice shows *"Invoice LG-2026-1016 created and sent (PayPal INV2-…)"*, and the row appears with the **Due soon** badge. *(Optional: cut to sandbox B-roll.)* | "Invoices go out through the PayPal Invoicing v2 API: create, then send. Each one then lives in a state machine: sent, due soon, due, overdue three days, overdue seven, paid. Nothing jumps states by accident." |
-| 4 | **0:37 – 1:00** | Open **🧪 Demo controls** and click **✨ Run chaser on all due/overdue invoices**. Scroll to **Reminder drafts**. Zoom on **Lumen Studio · friendly tone** (risk low). Then zoom on **Brightwave GmbH · firm tone**: highlight "per §4 (payment terms) of our agreement" and "Optional late fee mentioned: EUR 97.50 (1.5%)". Hover the reasoning line *"Risk high · client sentiment … · 10 days overdue · usually pays … late"*. | "The chaser is a LangGraph agent. It gathers context, reads the client's recent messages for sentiment, applies a tone policy, then drafts. A reliable UK studio gets a friendly nudge. A German client ten days late gets a formal note that cites the contract and offers an optional late fee, calculated in code. Its reasoning is right here. And it never sends anything; I do." |
-| 5 | **1:00 – 1:10** | In Demo controls, click **+7 days**. The notice lists transitions: *"LG-2026-903: Overdue 3d+ → Overdue 7d+ · LG-2026-907: Due soon → Overdue 3d+ · …"*. The Status badges in the grid update. | "To show the state machine, I'll jump the clock forward a week. Invoices move from due soon to overdue, exactly as the rules say." |
-| 6 | **1:10 – 1:22** | In the **Payment webhook** dropdown pick *LG-2026-912 · Harbor & Pine LLC · USD 800.00* and click **Simulate "invoice paid"**. The notice reads *"INVOICING.INVOICE.PAID received → LG-2026-912 marked paid, 1 pending reminder(s) cancelled."* Tick **Show cancelled** to show the draft dimmed. | "Then the client pays. The INVOICING.INVOICE.PAID webhook is verified, de-duplicated, marks the invoice paid and cancels the pending reminder, so I never chase someone who already paid." |
-| 7 | **1:22 – 1:55** | Go to **Disputes**. In Demo controls, choose *LG-2026-905 · Brightwave GmbH · EUR 6,500.00* and reason **Not as described**, then click **Simulate dispute webhook**. The notice reads *"…6 evidence items found and a defense package was drafted."* Show the case card (**Awaiting your approval**) and the yellow *"Buyer says: …"* banner. Scroll the **Evidence timeline** (signed SOW → milestone 1 → client approval → final delivery → acceptance email) and highlight the **[1] [2] [4] [5]** citations in **Statement to PayPal**. Click **✅ Approve & submit evidence**, pause on the *"Submit to PayPal? … can't be undone"* confirmation, then click **Yes, submit**. The badge changes to **Evidence submitted**. | "Now the scary one: a €6,500 dispute. The webhook arrives, LedgerGuard fetches it from the Disputes API and searches this client's contracts, milestones, deliveries and messages. A second agent builds a dated timeline and a statement where every claim cites its evidence. Nothing reaches PayPal until I approve and confirm. Only then does it call provide-evidence, once." |
-| 8 | **1:55 – 2:20** | Go to **Ask the ledger**. Click the chip **"past-due invoices over $1000"**. The answer line appears (fresh-seed dry run: *"3 invoice(s); totalling USD 6,450.00; 3 past due (max 12 days); clients: Acme Robotics Inc., Harbor & Pine LLC."*). Zoom on the **Filter applied** badges (*status in …*, *days overdue > 0*, *amount > 1000*, *currency = USD*) and the **"parsed by …"** label. The AG Grid shrinks to the matching rows. Then type **"unpaid invoices from Germany"** and press Enter. | "And when I just want an answer, I ask. The model never writes SQL or does arithmetic. It turns my question into a filter spec the server validates against an allow-list, and the totals are computed from the matching rows. I can see exactly how my question was read." |
-| 9 | **2:20 – 2:33** | Quick cuts: the architecture diagram from the README (FastAPI · LangGraph · Next.js + AG Grid · PayPal sandbox client / mock), then the terminal running `./run-tests.sh` → **32 passed**. | "Under the hood: FastAPI, two LangGraph agents, Next.js with AG Grid, and a PayPal client with OAuth, retries and idempotency keys. That same layer could one day become an easy PayPal connector for other African developers." |
-| 10 | **2:33 – 2:45** | Back to the Invoices dashboard, then the end card: **LedgerGuard AI** · `ledgerguard-web.onrender.com` · `github.com/Chrisleo-16/ledgerguard-ai` · "Built by Chrisben Evans Leo, Nairobi". | "For a freelancer selling across borders, late payments and chargebacks lock up capital you can't spare. LedgerGuard drafts the follow-ups, builds the defense and gives you exact answers, and you approve every step, so that money comes back to you sooner." |
+| 1 | **0:00 – 0:14** | Title card: **"LedgerGuard AI"**, subtitle *"Chrisben Evans Leo · Nairobi, Kenya"*. Cut to the landing page (`/`). | "I'm Chrisben, a developer in Nairobi. My clients are in the US and Europe. When one of them pays late or files a chargeback, it isn't an inconvenience. It's this month's rent, frozen." |
+| 2 | **0:14 – 0:26** | **Positioning beat.** Scroll the landing page. The sticky nav stays pinned and its pill follows the sections. Pause on the **Multiple Workflows & APIs** cards (Invoice chaser · Dispute defense · Ask the ledger). | "Other tools either chase invoices or fight disputes. LedgerGuard is the only one that uses your invoice trail to win the dispute, built natively on PayPal." |
+| 3 | **0:26 – 0:38** | Click the **Get Started** button; its arrow animates on hover. On `/app`, pan across the KPI cards (Outstanding, Overdue, Paid this month, Open disputes). | "It does three jobs in one app: chasing invoices, defending disputes, and answering questions about my money. Every total is computed per currency from real rows." |
+| 4 | **0:38 – 0:54** | Click **+ New invoice**: *Acme Robotics Inc. (US)*, "Landing page redesign", USD 1800, due **3 days from today**, then **Create & send**. Hold on the green **"Invoice sent"** toast (bottom-right) and the new row with the **Due soon** badge. Then in Demo controls click **+7 days** and show the badges change. | "I create an invoice and it goes out through PayPal Invoicing, then moves through a strict state machine, from sent to due soon, overdue and paid. A toast confirms each step in plain words." |
+| 5 | **0:54 – 1:16** | In Demo controls click **Run chaser**. Zoom on **Lumen Studio · friendly**, then **Brightwave GmbH · firm**: highlight the contract citation and *"Optional late fee: EUR 97.50 (1.5%)"*. Click **Approve** and show the **"Reminder approved"** toast. | "The chaser agent reads the client's recent messages, picks a tone, and drafts. A reliable UK studio gets a friendly nudge. A German client ten days late gets a formal note citing the contract, with an optional late fee capped in code. It never sends anything; I approve it." |
+| 6 | **1:16 – 1:26** | In **Payment webhook** pick *LG-…-912 · Harbor & Pine LLC* and click **Simulate "invoice paid"**. Show the toast and tick **Show cancelled** (the animated checkbox) to show the dimmed draft. | "When the client pays, the webhook is verified, the invoice is marked paid, and the pending reminder is cancelled." |
+| 7 | **1:26 – 1:50** | Go to **Disputes**. The seeded case **Brightwave GmbH · EUR 6,500 · Not as described** is already there, marked **Awaiting your approval**. Scroll the **Evidence timeline** (signed SOW, milestone, approval, delivery, reminders and replies) and highlight the **[1] [2] [4]** citations in the statement. Click **Approve & submit**, pause on the *"can't be undone"* confirmation, click **Yes, submit**, and show the **"Evidence submitted"** toast. | "Now the scary one: a six-thousand-five-hundred-euro dispute, already waiting here. A second agent builds the defense from my own invoice trail: the signed scope, milestones, delivery, every reminder and the client's replies. Each claim in the statement cites its evidence. Nothing reaches PayPal until I approve and confirm." |
+| 8 | **1:50 – 2:08** | Go to **Ask the ledger**. Click the chip **"past-due invoices over $1000"**. Zoom on the **Filter applied** badges and the exact total, and show the grid narrowing. | "And when I just want an answer, I ask. The model never writes SQL or does arithmetic. It writes a filter the server checks, and code computes the totals. I can see exactly how my question was read." |
+| 9 | **2:08 – 2:22** | Show a plain-language error toast (for example **Sync** while the API is stopped: *"We couldn't reach PayPal… Try again in a minute"*, with the **Details** toggle closed). Cut to the **Get LedgerGuard** card, hover **Install app** (tooltip *"Install as an app"*), and show the browser's install prompt. | "If something goes wrong, the app says what happened and what to do, never an error code. And it installs on my phone like an app." |
+| 10 | **2:22 – 2:40** | Back on the Invoices dashboard, then the end card: **LedgerGuard AI** · `ledgerguard-web.onrender.com` · `github.com/Chrisleo-16/ledgerguard-ai` · *"Built by Chrisben Evans Leo, Nairobi"*. | "Other tools chase invoices or fight disputes. LedgerGuard uses your invoice trail to win the dispute, natively on PayPal, with guardrails in code and a human approving every step, made for cross-border freelancers in markets like Kenya." |
+
+**Total:** about 2:40 · voiceover 336 words.
 
 ---
 
@@ -37,30 +51,30 @@
 
 > I'm Chrisben, a developer in Nairobi. My clients are in the US and Europe. When one of them pays late or files a chargeback, it isn't an inconvenience. It's this month's rent, frozen.
 >
-> LedgerGuard AI sits on top of PayPal and handles three jobs: chasing invoices, defending disputes, and answering questions about my money. Every total here is computed per currency from real rows.
+> Other tools either chase invoices or fight disputes. LedgerGuard is the only one that uses your invoice trail to win the dispute, built natively on PayPal.
 >
-> Invoices go out through the PayPal Invoicing v2 API: create, then send. Each one then lives in a state machine: sent, due soon, due, overdue three days, overdue seven, paid. Nothing jumps states by accident.
+> It does three jobs in one app: chasing invoices, defending disputes, and answering questions about my money. Every total is computed per currency from real rows.
 >
-> The chaser is a LangGraph agent. It gathers context, reads the client's recent messages for sentiment, applies a tone policy, then drafts. A reliable UK studio gets a friendly nudge. A German client ten days late gets a formal note that cites the contract and offers an optional late fee, calculated in code. Its reasoning is right here. And it never sends anything; I do.
+> I create an invoice and it goes out through PayPal Invoicing, then moves through a strict state machine, from sent to due soon, overdue and paid. A toast confirms each step in plain words.
 >
-> To show the state machine, I'll jump the clock forward a week. Invoices move from due soon to overdue, exactly as the rules say.
+> The chaser agent reads the client's recent messages, picks a tone, and drafts. A reliable UK studio gets a friendly nudge. A German client ten days late gets a formal note citing the contract, with an optional late fee capped in code. It never sends anything; I approve it.
 >
-> Then the client pays. The INVOICING.INVOICE.PAID webhook is verified, de-duplicated, marks the invoice paid and cancels the pending reminder, so I never chase someone who already paid.
+> When the client pays, the webhook is verified, the invoice is marked paid, and the pending reminder is cancelled.
 >
-> Now the scary one: a €6,500 dispute. The webhook arrives, LedgerGuard fetches it from the Disputes API and searches this client's contracts, milestones, deliveries and messages. A second agent builds a dated timeline and a statement where every claim cites its evidence. Nothing reaches PayPal until I approve and confirm. Only then does it call provide-evidence, once.
+> Now the scary one: a six-thousand-five-hundred-euro dispute, already waiting here. A second agent builds the defense from my own invoice trail: the signed scope, milestones, delivery, every reminder and the client's replies. Each claim in the statement cites its evidence. Nothing reaches PayPal until I approve and confirm.
 >
-> And when I just want an answer, I ask. The model never writes SQL or does arithmetic. It turns my question into a filter spec the server validates against an allow-list, and the totals are computed from the matching rows. I can see exactly how my question was read.
+> And when I just want an answer, I ask. The model never writes SQL or does arithmetic. It writes a filter the server checks, and code computes the totals. I can see exactly how my question was read.
 >
-> Under the hood: FastAPI, two LangGraph agents, Next.js with AG Grid, and a PayPal client with OAuth, retries and idempotency keys. That same layer could one day become an easy PayPal connector for other African developers.
+> If something goes wrong, the app says what happened and what to do, never an error code. And it installs on my phone like an app.
 >
-> For a freelancer selling across borders, late payments and chargebacks lock up capital you can't spare. LedgerGuard drafts the follow-ups, builds the defense and gives you exact answers, and you approve every step, so that money comes back to you sooner.
+> Other tools chase invoices or fight disputes. LedgerGuard uses your invoice trail to win the dispute, natively on PayPal, with guardrails in code and a human approving every step, made for cross-border freelancers in markets like Kenya.
 
 ---
 
 ## Notes on accuracy (keep the video honest)
 
-- The payment and dispute shown are **simulated webhooks in mock mode**, sent through the real webhook handler. The sidebar shows "Demo (mock)". Don't describe them as live sandbox events unless you recorded them against the sandbox.
-- Reminder **tone** and the **late fee** come from deterministic rules. The model (if configured) scores sentiment and writes the wording. Don't say "the AI decided to charge a late fee".
-- If you record with the rules fallback, the dispute statement comes from the deterministic composer and the ledger shows "parsed by fallback". Leave that visible, or record with Claude (`claude-sonnet-5-5`) enabled.
-- Planned items (hybrid search, evidence file uploads, accounts, the connector for African developers) appear only as future ideas. Don't show or describe them as working.
-- No user numbers, revenue figures or prize claims are made anywhere in the video.
+- The payment shown is a **simulated webhook in mock mode**, run through the real webhook handler. The disputes are **seeded demo data**. Don't describe either as live sandbox events.
+- The reminder **tone** and the **late fee** come from rules in code. The model, if configured, only scores sentiment and writes the wording.
+- "The only one" is a positioning claim. Keep it phrased as a comparison with "other tools" in general, and never name a product.
+- Planned items (hybrid search, evidence file uploads, accounts, a PayPal connector for other developers) are future ideas only. Don't show or describe them as working.
+- No user numbers, revenue figures or prize claims appear anywhere in the video.

@@ -8,6 +8,14 @@ Built by Chrisben Evans Leo (Nairobi) for the PayPal AI Hackathon, 2026. Built d
 
 ![LedgerGuard AI invoice chaser home screen](docs/readme/screens/home.png)
 
+## Why LedgerGuard
+
+Other tools either chase invoices or fight disputes. LedgerGuard is the only one that uses your invoice trail to win the dispute, built natively on PayPal.
+
+1. All three jobs (invoice chasing, dispute defense, a conversational ledger) in one PayPal-native app.
+2. Dispute evidence built from the invoice and reminder history, not just order data.
+3. Guardrails enforced in code (fee caps, human approval), made for cross-border freelancers in markets like Kenya.
+
 ## Judge access
 
 - Landing: https://ledgerguard-web.onrender.com · Demo app: https://ledgerguard-web.onrender.com/app · API: https://ledgerguard-api-i7i3.onrender.com (OpenAPI docs at `/docs`).

@@ -7,7 +7,7 @@
 | **Author** | Chrisben Evans Leo, second-year Data Science student and full-stack developer, Nairobi, Kenya |
 | **Live demo** | https://ledgerguard-web.onrender.com (landing) · https://ledgerguard-web.onrender.com/app (demo app) · API https://ledgerguard-api-i7i3.onrender.com |
 | **Source code** | https://github.com/Chrisleo-16/ledgerguard-ai |
-| **Demo video** | `[YOUTUBE_URL — placeholder, add before submitting]` |
+| **Demo video** | `[YOUTUBE_URL]` |
 | **AI model** | Claude `claude-sonnet-5-5` via the Anthropic Python SDK (`LLM_MODEL` overrides it) |
 | **License** | MIT |
 | **Built** | During the submission period, October 2026 |
@@ -20,6 +20,14 @@
 - No login needed. `/login` is a demo screen; "Continue to demo" opens the app.
 - Both services run on Render's free plan and sleep when idle. The first request can take about a minute while they wake; reload if the app shows "API offline".
 - The demo uses SQLite on an ephemeral disk and re-seeds its demo data on every boot, so changes you make are reset after a restart.
+
+## Why LedgerGuard (positioning)
+
+Other tools either chase invoices or fight disputes. LedgerGuard is the only one that uses your invoice trail to win the dispute, built natively on PayPal.
+
+1. **All three jobs in one PayPal-native app:** invoice chasing, dispute defense and a conversational ledger share one invoice ledger, so nothing is copied between tools.
+2. **Dispute evidence built from the invoice and reminder history, not just order data.** The defense draws on the signed scope, milestones, deliveries, every reminder sent and the client's replies, and each claim cites its source.
+3. **Guardrails enforced in code, made for cross-border freelancers.** Late-fee caps, exact per-currency totals and human approval before anything reaches PayPal are rules in code, not prompts. It's built for freelancers in markets like Kenya who are paid from abroad.
 
 ## Inspiration
 
@@ -67,6 +75,7 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 - The **AG Grid** table updates to show the matching rows. The **summary sentence** (count, totals per currency, number past due, maximum days late, clients) is **computed exactly from those rows in code**. The LLM never writes a number in it. The filter that was applied appears as badges, so you can see how your question was read.
 
 ### Also built in
+- **Current UI:** a sticky nav that tracks the section you're on; plain-language status toasts (success, loading, warning, error) that say what happened and what to do next, with technical details behind a **Details** toggle; an installable PWA with an **Install app** button that uses the browser's install prompt and explains *Share → Add to Home Screen* on iOS; and two seeded demo disputes, so the Disputes page is ready on first load.
 - A dashboard with KPI cards: outstanding, overdue, paid this month and open disputes, each totalled per currency from the stored data.
 - **Demo controls** for judges: a dev clock (+1, +3 or +7 days) to watch invoices change state, plus simulated payment and dispute webhooks that go through the real webhook handler in mock mode.
 - The sidebar shows whether PayPal is running in **Sandbox or Demo (mock)** mode and whether a **model or the rules fallback** is active, so the demo always shows which mode it's in.
@@ -92,7 +101,7 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 - AG Grid tables with custom cell renderers for status badges, country flags, days late and per-row actions ("Send via PayPal", "✨ Draft reminder").
 
 **Quality and tooling**
-- **32 automated pytest tests** cover the state machine, filter validation (including a SQL-injection-shaped field name being rejected), currency handling, OAuth plus backoff (using `httpx.MockTransport`), the webhook signature request, the full invoice flow, webhook de-duplication, the dispute package and the guard against double submission, Sync polling, and exact KPI totals. Guardrails are tested too. All 32 pass.
+- **56 automated pytest tests** cover the state machine, filter validation (including a SQL-injection-shaped field name being rejected), currency handling, OAuth plus backoff (using `httpx.MockTransport`), the webhook signature request, the full invoice flow, webhook de-duplication, the dispute package and the guard against double submission, Sync polling, exact KPI totals, the self-healing mock after a restart, and the plain-language error mapper. Guardrails are tested too. All 56 pass.
 - `docker compose up --build`, or one script each for backend, frontend and tests.
 
 ## PayPal APIs used
@@ -147,7 +156,7 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 - A dispute defense that **cites its sources**: every claim in the statement points to an evidence ID shown in the timeline.
 - A conversational ledger whose numbers you can **trust**: the applied filter is shown as badges, and the parser used (LLM or fallback) is labelled.
 - The whole product runs with **no credentials and no model** (mock PayPal plus deterministic fallbacks), and the same code moves to the real sandbox when you add keys.
-- 32 passing tests covering the risky parts: money, state, webhooks and PayPal retries.
+- 56 passing tests covering the risky parts: money, state, webhooks and PayPal retries.
 
 ## What we learned
 

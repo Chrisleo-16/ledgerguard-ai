@@ -1,7 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Icon } from "@/components/icons";
 const MIN = 600, MAX = 2000;
 /** Launch splash: brand mark with a circular progress ring. Server-rendered visible so it covers first paint,
  *  fades once hydrated (min 600ms, max 2s). Re-shows briefly on navigation into /app. Hidden for reduced motion via CSS. */
@@ -32,10 +31,6 @@ export function Splash() {
   }, [path]);
   if (state === "off") return null;
   return <div className={`splash ${state === "out" ? "out" : ""}`} aria-hidden="true">
-    <div className="sp-mark">
-      <svg className="sp-ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" className="sp-track" /><circle cx="60" cy="60" r="54" className="sp-arc" pathLength="100" /></svg>
-      <span className="sp-logo"><Icon n="logo" size={30} stroke={1.7} /></span>
-    </div>
-    <span className="sp-word">LedgerGuard</span>
+    <svg className="sp-ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" className="sp-arc" pathLength="100" /></svg>
   </div>;
 }

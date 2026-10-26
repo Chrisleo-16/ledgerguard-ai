@@ -23,16 +23,50 @@ def _startup():
         if empty:
             from . import seed
             seed.run()
+    # Demo disputes left as 'received' (fresh seed, or a seed run by another process) get their defense package.
+    # With a live LLM this can take a while, so it runs in the background and never blocks boot/health checks.
+    if llm.enabled():
+        import threading; threading.Thread(target=services.build_pending_packages, daemon=True).start()
+    else:
+        services.build_pending_packages()
 
 def _inv(s, inv_id) -> Invoice:
     inv = s.get(Invoice, inv_id)
     if not inv: raise HTTPException(404, "invoice not found")
     return inv
 
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from . import errors as uerr
+_elog = logging.getLogger("ledgerguard.api")
+
+def _reply(req: Request, ue: "uerr.UserError", debug: str) -> JSONResponse:
+    _elog.warning("%s %s -> %s %s | %s", req.method, req.url.path, ue.status, ue.code, debug)
+    return JSONResponse(status_code=ue.status, content=ue.body(debug if config.ERROR_DEBUG else None))
+
 @app.exception_handler(PayPalError)
-def _pp_err(_, e: PayPalError):
-    from fastapi.responses import JSONResponse
-    return JSONResponse(status_code=502, content={"detail": "PayPal error", "paypal_status": e.status, "body": e.body})
+def _pp_err(req: Request, e: PayPalError):
+    name = e.body.get("name") if isinstance(e.body, dict) else None
+    ue = uerr.from_paypal(e.status, uerr.action_for(req.method, req.url.path), name)
+    return _reply(req, ue, f"PayPal {e.status} {name or ''} {str(e.body)[:300]}")
+
+@app.exception_handler(StarletteHTTPException)
+def _http_err(req: Request, e: StarletteHTTPException):
+    ue = uerr.from_http(e.status_code, str(e.detail), uerr.action_for(req.method, req.url.path))
+    return _reply(req, ue, f"HTTP {e.status_code}: {e.detail}")
+
+@app.exception_handler(RequestValidationError)
+def _val_err(req: Request, e: RequestValidationError):
+    ue = uerr.validation(e.errors(), uerr.action_for(req.method, req.url.path))
+    return _reply(req, ue, str(e.errors())[:500])
+
+@app.exception_handler(Exception)
+def _any_err(req: Request, e: Exception):
+    a = uerr.action_for(req.method, req.url.path)
+    ue = uerr.from_llm(a) if uerr.is_llm_exception(e) else uerr.from_paypal(0, a) if uerr.is_network_exception(e) else uerr.unexpected(a)
+    _elog.exception("unhandled error on %s %s", req.method, req.url.path)
+    return _reply(req, ue, f"{type(e).__name__}: {e}"[:500])
 
 @app.get("/api/health")
 def health(s: Session = Depends(get_session)):
@@ -179,8 +213,13 @@ def ledger_query(body: QueryIn, s: Session = Depends(get_session)):
     services.refresh_states(s); t = clock.today(s)
     rows = [services.inv_row(i, t) for i in s.scalars(select(Invoice))]
     names = [c.name for c in s.scalars(select(Client))]
-    spec, source = filters.parse_question(body.question, names, t.isoformat())
-    res = filters.apply(rows, spec)
+    if not body.question.strip(): raise HTTPException(422, "empty question")
+    try:
+        spec, source = filters.parse_question(body.question, names, t.isoformat())
+        res = filters.apply(rows, spec)
+    except Exception as e:
+        logging.getLogger(__name__).warning("ledger question not answerable: %r (%s)", body.question, e)
+        raise HTTPException(422, "question could not be parsed")
     return {"question": body.question, "spec": spec.model_dump(), "parser": source, "rows": res, "summary": filters.summarize(res)}
 
 @app.post("/api/ledger/filter")

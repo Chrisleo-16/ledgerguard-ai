@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { api, post, Invoice, money } from "@/lib/api";
-import { Badge, PageHead, DemoPanel } from "@/components/ui";
+import { Badge, PageHead, DemoPanel, Notice, errNote, type Note } from "@/components/ui";
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { Icon, IconTile, IcName } from "@/components/icons";
 const REASONS: Record<string, string> = { MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED: "Not as described", MERCHANDISE_OR_SERVICE_NOT_RECEIVED: "Not received", UNAUTHORISED: "Unauthorised" };
@@ -11,15 +11,15 @@ export default function DisputesPage() {
   const [ev, setEv] = useState<any[]>([]); const [activity, setActivity] = useState<any[]>([]);
   const [ds, setDs] = useState<any[]>([]); const [invs, setInvs] = useState<Invoice[]>([]); const [selId, setSelId] = useState<number | null>(null);
   const [simInv, setSimInv] = useState(0); const [reason, setReason] = useState(Object.keys(REASONS)[0]);
-  const [note, setNote] = useState<{ t: string; err?: boolean } | null>(null); const [busy, setBusy] = useState(false); const [confirming, setConfirming] = useState(false);
+  const [note, setNote] = useState<Note>(null); const [busy, setBusy] = useState(false); const [confirming, setConfirming] = useState(false);
   const load = async () => {
     const [d, i, e, a] = await Promise.all([api("/api/disputes"), api("/api/invoices"), api("/api/evidence/summary"), api("/api/activity")]);
     setDs(d); setInvs(i); setEv(e); setActivity(a);
     setSelId(cur => cur && d.some((x: any) => x.id === cur) ? cur : d[0]?.id ?? null);
     setSimInv(cur => cur || (i.find((x: Invoice) => x.client.startsWith("Brightwave") && x.status !== "paid") || i[0])?.id || 0);
   };
-  useEffect(() => { load().catch(e => setNote({ t: String(e), err: true })); }, []);
-  const act = async (f: () => Promise<any>, ok: (r: any) => string) => { setBusy(true); try { const r = await f(); setNote({ t: ok(r) }); await load(); } catch (e) { setNote({ t: String(e), err: true }); } finally { setBusy(false); setConfirming(false); } };
+  useEffect(() => { load().catch(e => setNote(errNote(e))); }, []);
+  const act = async (f: () => Promise<any>, ok: (r: any) => string) => { setBusy(true); try { const r = await f(); setNote({ t: ok(r) }); await load(); } catch (e) { setNote(errNote(e)); } finally { setBusy(false); setConfirming(false); } };
   const d = ds.find(x => x.id === selId); const p = d?.package || {}; const inv = invs.find(i => i.id === d?.invoice_id);
   const asmt = p.assessment || {}; const rel: Record<number, any> = Object.fromEntries((asmt.ranked || []).map((r: any) => [r.evidence_id, r]));
   const msIds = new Set((p.milestone_refs || []).map((m: any) => m.evidence_id));
@@ -27,7 +27,7 @@ export default function DisputesPage() {
   return (<>
     <PageHead icon="disputes" title="Disputes" sub="When a buyer opens a PayPal dispute, LedgerGuard gathers your evidence and drafts a defense package. You review it before anything is submitted."
       right={<Button variant="bordered" className="bg-content1 border-default-200" size="md" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.new_disputes.length} new dispute(s).`)}><Icon n="sync" /> Check PayPal for disputes</Button>} />
-    {note && <div className={`notice ${note.err ? "err" : ""}`}>{note.t}</div>}
+    <Notice note={note} onClose={() => setNote(null)} />
     <DemoPanel hint="simulate a CUSTOMER.DISPUTE.CREATED webhook (mock mode)">
       <div className="group"><span>Open a dispute</span>
         <select value={simInv} onChange={e => setSimInv(+e.target.value)}>{invs.map(i => <option key={i.id} value={i.id}>{i.number} · {i.client} · {money(i.amount, i.currency)}</option>)}</select>

@@ -30,3 +30,6 @@ CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3
 if os.getenv("FRONTEND_HOST"):  # set by render.yaml from the frontend service's RENDER_EXTERNAL_HOSTNAME
     CORS_ORIGINS.append("https://" + os.getenv("FRONTEND_HOST").strip())
 SEED_DEMO_IF_EMPTY = os.getenv("SEED_DEMO_IF_EMPTY", "true").lower() in ("1", "true", "yes")
+
+# Include technical details (behind the UI "Details" toggle) in error responses. Off in production.
+ERROR_DEBUG = os.getenv("ERROR_DEBUG", "true").lower() in ("1", "true", "yes")

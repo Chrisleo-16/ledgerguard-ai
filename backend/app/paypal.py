@@ -1,7 +1,7 @@
 """PayPal REST client (sandbox) + faithful mock with the same interface."""
 from __future__ import annotations
 import json, random, time, uuid
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 import httpx
 from . import config
 
@@ -113,14 +113,52 @@ class SandboxPayPalClient:
             return False
         return self._api("POST", "/v1/notifications/verify-webhook-signature", body).get("verification_status") == "SUCCESS"
 
+def dispute_resource(dispute_id: str, invoice_number: str, amount: float, currency: str, reason: str,
+                     buyer_email: str, buyer_name: str, messages: list[str], due_in_days: int = 10) -> dict:
+    """A dispute in PayPal's GET /v1/customer/disputes/{id} shape (used by the mock and the demo seed)."""
+    return {
+        "dispute_id": dispute_id, "create_time": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime()),
+        "reason": reason, "status": "WAITING_FOR_SELLER_RESPONSE", "dispute_life_cycle_stage": "INQUIRY",
+        "dispute_amount": {"currency_code": currency, "value": f"{amount:.2f}"},
+        "disputed_transactions": [{"buyer_transaction_id": uuid.uuid4().hex[:17].upper(),
+                                   "seller_transaction_id": uuid.uuid4().hex[:17].upper(),
+                                   "invoice_number": invoice_number,
+                                   "buyer": {"email": buyer_email, "name": buyer_name}}],
+        "messages": [{"posted_by": "BUYER", "content": m} for m in messages],
+        "seller_response_due_date": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime(time.time() + due_in_days * 86400)),
+    }
+
 class MockPayPalClient:
     """In-memory mock mirroring PayPal response shapes. Used when PAYPAL_MODE=mock."""
     mode = "mock"
 
-    def __init__(self):
+    def __init__(self, loader: Callable[[str, str | None], Any] | None = None):
         self.invoices: dict[str, dict] = {}
         self.disputes: dict[str, dict] = {}
         self.evidence_submissions: list[dict] = []
+        # Self-healing: the mock lives in process memory, which is lost on restart/sleep (and not shared
+        # across workers) while the DB keeps the ids. On a miss we rebuild the resource from DB rows.
+        self.loader = loader
+
+    def reset(self):
+        """Forget all in-memory state (what a process restart does)."""
+        self.invoices.clear(); self.disputes.clear(); self.evidence_submissions.clear()
+
+    def _invoice(self, invoice_id: str) -> dict:
+        if invoice_id not in self.invoices and self.loader:
+            got = self.loader("invoice", invoice_id)
+            if got: self.invoices[invoice_id] = got
+        if invoice_id not in self.invoices:
+            raise PayPalError(404, {"name": "RESOURCE_NOT_FOUND", "message": f"invoice {invoice_id} not found"})
+        return self.invoices[invoice_id]
+
+    def _dispute(self, dispute_id: str) -> dict:
+        if dispute_id not in self.disputes and self.loader:
+            got = self.loader("dispute", dispute_id)
+            if got: self.disputes[dispute_id] = got
+        if dispute_id not in self.disputes:
+            raise PayPalError(404, {"name": "RESOURCE_NOT_FOUND", "message": f"dispute {dispute_id} not found"})
+        return self.disputes[dispute_id]
 
     def create_invoice(self, invoice: dict) -> dict:
         inv_id = "INV2-" + uuid.uuid4().hex[:16].upper()
@@ -129,15 +167,171 @@ class MockPayPalClient:
                 "raw": {"rel": "self", "method": "GET", "href": f"{config.PAYPAL_BASE_URL}/v2/invoicing/invoices/{inv_id}"}}
 
     def send_invoice(self, invoice_id, note=None) -> dict:
-        if invoice_id not in self.invoices:
-            raise PayPalError(404, {"name": "RESOURCE_NOT_FOUND"})
-        self.invoices[invoice_id]["status"] = "SENT"
+        self._invoice(invoice_id)["status"] = "SENT"
         return {"rel": "payer-view", "method": "GET", "href": f"https://www.sandbox.paypal.com/invoice/p/#{invoice_id}"}
 
     def get_invoice(self, invoice_id) -> dict:
+        return self._invoice(invoice_id)
+
+    def register_dispute(self, dispute_id: str, invoice_number: str, amount: float, currency: str,
+                         reason: str, buyer_email: str, buyer_name: str, messages: list[str]):
+        self.disputes[dispute_id] = dispute_resource(dispute_id, invoice_number, amount, currency, reason, buyer_email, buyer_name, messages)
+
+    def get_dispute(self, dispute_id: str) -> dict: ...
+    def list_disputes(self, page_size: int = 20) -> list[dict]: ...
+    def provide_evidence(self, dispute_id: str, evidences: list[dict], files: list[tuple[str, bytes]] | None = None) -> dict: ...
+    def verify_webhook_signature(self, headers: dict, event: dict) -> bool: ...
+
+def build_invoice_payload(number: str, merchant_email: str, client_name: str, client_email: str,
+                          description: str, amount: float, currency: str, issue_date: str, due_date: str) -> dict:
+    """Body for POST /v2/invoicing/invoices."""
+    return {
+        "detail": {"invoice_number": number, "currency_code": currency, "invoice_date": issue_date,
+                   "payment_term": {"due_date": due_date}, "note": "Thank you for your business."},
+        # invoicer.email_address omitted when blank: PayPal then defaults to the REST app's business account
+        "invoicer": {"name": {"given_name": config.MERCHANT_NAME}, **({"email_address": merchant_email} if merchant_email else {})},
+        "primary_recipients": [{"billing_info": {"name": {"full_name": client_name}, "email_address": client_email}}],
+        "items": [{"name": description[:200] or "Services", "quantity": "1",
+                   "unit_amount": {"currency_code": currency, "value": f"{amount:.2f}"}, "unit_of_measure": "AMOUNT"}],
+    }
+
+class SandboxPayPalClient:
+    mode = "sandbox"
+
+    def __init__(self, client_id: str, secret: str, base_url: str = config.PAYPAL_BASE_URL,
+                 webhook_id: str = config.PAYPAL_WEBHOOK_ID, max_retries: int = 5, transport=None, sleep=time.sleep):
+        self.client_id, self.secret, self.base_url, self.webhook_id = client_id, secret, base_url.rstrip("/"), webhook_id
+        self.max_retries, self._sleep = max_retries, sleep
+        self._http = httpx.Client(base_url=self.base_url, timeout=30, transport=transport)
+        self._token: str | None = None
+        self._token_exp = 0.0
+
+    def _get_token(self) -> str:
+        if self._token and time.time() < self._token_exp - 60:
+            return self._token
+        r = self._request_raw("POST", "/v1/oauth2/token", auth=(self.client_id, self.secret),
+                              data={"grant_type": "client_credentials"},
+                              headers={"Accept": "application/json"})
+        body = r.json()
+        self._token, self._token_exp = body["access_token"], time.time() + int(body.get("expires_in", 3000))
+        return self._token
+
+    def _request_raw(self, method, path, **kw) -> httpx.Response:
+        for attempt in range(self.max_retries + 1):
+            r = self._http.request(method, path, **kw)
+            if r.status_code in RETRY_STATUSES and attempt < self.max_retries:
+                ra = r.headers.get("Retry-After")
+                delay = float(ra) if ra and ra.isdigit() else min(30, 0.5 * 2 ** attempt) + random.uniform(0, 0.25)
+                self._sleep(delay)
+                continue
+            if r.status_code >= 400:
+                try: body = r.json()
+                except Exception: body = r.text
+                raise PayPalError(r.status_code, body)
+            return r
+        raise PayPalError(599, "retries exhausted")
+
+    def _api(self, method, path, json_body=None, **kw) -> dict:
+        headers = {"Authorization": f"Bearer {self._get_token()}", "Content-Type": "application/json",
+                   "PayPal-Request-Id": str(uuid.uuid4()), **kw.pop("headers", {})}
+        if "files" in kw: headers.pop("Content-Type")
+        r = self._request_raw(method, path, json=json_body, headers=headers, **kw)
+        return r.json() if r.content else {}
+
+    def create_invoice(self, invoice: dict) -> dict:
+        res = self._api("POST", "/v2/invoicing/invoices", invoice)
+        inv_id = res.get("id") or res.get("href", "").rstrip("/").split("/")[-1]
+        return {"id": inv_id, "status": res.get("status", "DRAFT"), "raw": res}
+
+    def send_invoice(self, invoice_id: str, note: str | None = None) -> dict:
+        body = {"send_to_invoicer": True, "send_to_recipient": True}
+        if note: body["note"] = note
+        return self._api("POST", f"/v2/invoicing/invoices/{invoice_id}/send", body)
+
+    def get_invoice(self, invoice_id: str) -> dict:
+        return self._api("GET", f"/v2/invoicing/invoices/{invoice_id}")
+
+    def get_dispute(self, dispute_id: str) -> dict:
+        return self._api("GET", f"/v1/customer/disputes/{dispute_id}")
+
+    def list_disputes(self, page_size: int = 20) -> list[dict]:
+        return self._api("GET", f"/v1/customer/disputes?page_size={page_size}").get("items", [])
+
+    def provide_evidence(self, dispute_id, evidences, files=None) -> dict:
+        files_part = [("input", (None, json.dumps({"evidences": evidences}), "application/json"))]
+        for name, data in files or []:
+            files_part.append(("file1", (name, data, "application/pdf")))
+        return self._api("POST", f"/v1/customer/disputes/{dispute_id}/provide-evidence", files=files_part)
+
+    def verify_webhook_signature(self, headers: dict, event: dict) -> bool:
+        h = {k.lower(): v for k, v in headers.items()}
+        body = {"auth_algo": h.get("paypal-auth-algo"), "cert_url": h.get("paypal-cert-url"),
+                "transmission_id": h.get("paypal-transmission-id"), "transmission_sig": h.get("paypal-transmission-sig"),
+                "transmission_time": h.get("paypal-transmission-time"), "webhook_id": self.webhook_id,
+                "webhook_event": event}
+        if not all(body.values()):
+            return False
+        return self._api("POST", "/v1/notifications/verify-webhook-signature", body).get("verification_status") == "SUCCESS"
+
+def dispute_resource(dispute_id: str, invoice_number: str, amount: float, currency: str, reason: str,
+                     buyer_email: str, buyer_name: str, messages: list[str], due_in_days: int = 10) -> dict:
+    """A dispute in PayPal's GET /v1/customer/disputes/{id} shape (used by the mock and the demo seed)."""
+    return {
+        "dispute_id": dispute_id, "create_time": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime()),
+        "reason": reason, "status": "WAITING_FOR_SELLER_RESPONSE", "dispute_life_cycle_stage": "INQUIRY",
+        "dispute_amount": {"currency_code": currency, "value": f"{amount:.2f}"},
+        "disputed_transactions": [{"buyer_transaction_id": uuid.uuid4().hex[:17].upper(),
+                                   "seller_transaction_id": uuid.uuid4().hex[:17].upper(),
+                                   "invoice_number": invoice_number,
+                                   "buyer": {"email": buyer_email, "name": buyer_name}}],
+        "messages": [{"posted_by": "BUYER", "content": m} for m in messages],
+        "seller_response_due_date": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime(time.time() + due_in_days * 86400)),
+    }
+
+class MockPayPalClient:
+    """In-memory mock mirroring PayPal response shapes. Used when PAYPAL_MODE=mock."""
+    mode = "mock"
+
+    def __init__(self, loader: Callable[[str, str | None], Any] | None = None):
+        self.invoices: dict[str, dict] = {}
+        self.disputes: dict[str, dict] = {}
+        self.evidence_submissions: list[dict] = []
+        # Self-healing: the mock lives in process memory, which is lost on restart/sleep (and not shared
+        # across workers) while the DB keeps the ids. On a miss we rebuild the resource from DB rows.
+        self.loader = loader
+
+    def reset(self):
+        """Forget all in-memory state (what a process restart does)."""
+        self.invoices.clear(); self.disputes.clear(); self.evidence_submissions.clear()
+
+    def _invoice(self, invoice_id: str) -> dict:
+        if invoice_id not in self.invoices and self.loader:
+            got = self.loader("invoice", invoice_id)
+            if got: self.invoices[invoice_id] = got
         if invoice_id not in self.invoices:
-            raise PayPalError(404, {"name": "RESOURCE_NOT_FOUND"})
+            raise PayPalError(404, {"name": "RESOURCE_NOT_FOUND", "message": f"invoice {invoice_id} not found"})
         return self.invoices[invoice_id]
+
+    def _dispute(self, dispute_id: str) -> dict:
+        if dispute_id not in self.disputes and self.loader:
+            got = self.loader("dispute", dispute_id)
+            if got: self.disputes[dispute_id] = got
+        if dispute_id not in self.disputes:
+            raise PayPalError(404, {"name": "RESOURCE_NOT_FOUND", "message": f"dispute {dispute_id} not found"})
+        return self.disputes[dispute_id]
+
+    def create_invoice(self, invoice: dict) -> dict:
+        inv_id = "INV2-" + uuid.uuid4().hex[:16].upper()
+        self.invoices[inv_id] = {"id": inv_id, "status": "DRAFT", **invoice}
+        return {"id": inv_id, "status": "DRAFT",
+                "raw": {"rel": "self", "method": "GET", "href": f"{config.PAYPAL_BASE_URL}/v2/invoicing/invoices/{inv_id}"}}
+
+    def send_invoice(self, invoice_id, note=None) -> dict:
+        self._invoice(invoice_id)["status"] = "SENT"
+        return {"rel": "payer-view", "method": "GET", "href": f"https://www.sandbox.paypal.com/invoice/p/#{invoice_id}"}
+
+    def get_invoice(self, invoice_id) -> dict:
+        return self._invoice(invoice_id)
 
     def register_dispute(self, dispute_id: str, invoice_number: str, amount: float, currency: str,
                          reason: str, buyer_email: str, buyer_name: str, messages: list[str]):
@@ -154,12 +348,13 @@ class MockPayPalClient:
         }
 
     def get_dispute(self, dispute_id) -> dict:
-        if dispute_id not in self.disputes:
-            raise PayPalError(404, {"name": "RESOURCE_NOT_FOUND"})
-        return self.disputes[dispute_id]
+        return self._dispute(dispute_id)
 
     def list_disputes(self, page_size: int = 20) -> list[dict]:
-        return [{"dispute_id": d["dispute_id"], "status": d["status"], "reason": d["reason"]} for d in list(self.disputes.values())[:page_size]]
+        known = dict(self.disputes)
+        for d in (self.loader("disputes", None) or []) if self.loader else []:
+            known.setdefault(d["dispute_id"], d)
+        return [{"dispute_id": d["dispute_id"], "status": d["status"], "reason": d["reason"]} for d in list(known.values())[:page_size]]
 
     def mark_paid(self, invoice_id: str):
         """Mock-only: emulate the buyer paying (status flips like PayPal's GET would show)."""
@@ -183,5 +378,27 @@ def get_paypal() -> PayPalClient:
         if config.PAYPAL_MODE == "sandbox":
             _client = SandboxPayPalClient(config.PAYPAL_CLIENT_ID, config.PAYPAL_CLIENT_SECRET)
         else:
-            _client = MockPayPalClient()
+            _client = MockPayPalClient(loader=_db_loader)
     return _client
+
+_INV_STATUS = {"draft": "DRAFT", "paid": "PAID", "cancelled": "CANCELLED"}
+
+def _db_loader(kind: str, key: str | None):
+    """Rebuild mock PayPal resources from the DB (source of truth) after a restart or on another worker."""
+    from .db import SessionLocal, Invoice, Dispute
+    from sqlalchemy import select
+    with SessionLocal() as s:
+        if kind == "invoice":
+            inv = s.scalar(select(Invoice).where(Invoice.paypal_id == key))
+            if not inv: return None
+            c = inv.client
+            body = build_invoice_payload(inv.number, config.MERCHANT_EMAIL, c.name if c else "", c.email if c else "", inv.description,
+                                         inv.amount, inv.currency, inv.issue_date.isoformat(), inv.due_date.isoformat())
+            return {"id": inv.paypal_id, "status": _INV_STATUS.get(inv.status, "SENT"), **body}
+        rows = s.scalars(select(Dispute)).all() if kind == "disputes" else s.scalars(select(Dispute).where(Dispute.paypal_dispute_id == key)).all()
+        out = []
+        for d in rows:
+            if not d.details: continue
+            out.append({**d.details, "dispute_id": d.paypal_dispute_id,
+                        "status": "UNDER_REVIEW" if d.status == "submitted" else d.details.get("status", "WAITING_FOR_SELLER_RESPONSE")})
+        return out if kind == "disputes" else (out[0] if out else None)

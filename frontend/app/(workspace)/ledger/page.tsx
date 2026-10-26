@@ -1,4 +1,5 @@
 "use client";
+import { Notice, errNote, type Note } from "@/components/ui";
 import { Flag } from "@/components/flag";
 import { useEffect, useMemo, useState } from "react";
 import { api, post, Invoice } from "@/lib/api";
@@ -8,8 +9,8 @@ import { Icon } from "@/components/icons";
 import { AgGridReact, amountFmt, COUNTRY, useIsMobile } from "@/components/grid";
 const EXAMPLES = ["past-due invoices over $1000", "unpaid invoices from Germany", "paid invoices", "overdue more than 5 days", "largest open invoices in USD", "invoices under 1k"];
 export default function LedgerPage() {
-  const [rows, setRows] = useState<Invoice[]>([]); const [q, setQ] = useState(""); const [res, setRes] = useState<any>(null); const [err, setErr] = useState(""); const [busy, setBusy] = useState(false);
-  useEffect(() => { api("/api/invoices").then(setRows).catch(e => setErr(String(e))); }, []);
+  const [rows, setRows] = useState<Invoice[]>([]); const [q, setQ] = useState(""); const [res, setRes] = useState<any>(null); const [err, setErr] = useState<Note>(null); const [busy, setBusy] = useState(false);
+  useEffect(() => { api("/api/invoices").then(setRows).catch(e => setErr(errNote(e))); }, []);
   const mobile = useIsMobile();
   const cols = useMemo(() => [
     { field: "number", headerName: "Invoice", width: mobile ? 140 : 172, minWidth: mobile ? 140 : 172, pinned: mobile ? "left" : undefined },
@@ -21,8 +22,8 @@ export default function LedgerPage() {
     { field: "due_date", headerName: "Due date", width: 168, cellRenderer: (p: any) => <span>{p.value}{p.data.days_overdue > 0 && <span className="cell-sub"> · {p.data.days_overdue}d late</span>}</span> },
     { field: "paid_at", headerName: "Paid at", hide: mobile, width: 112, valueFormatter: (p: any) => p.value || "—" },
   ] as any, [mobile]);
-  const ask = async (question: string) => { if (!question.trim()) return; setErr(""); setBusy(true);
-    try { const r = await post("/api/ledger/query", { question }); setRes(r); setRows(r.rows); } catch (e) { setErr(String(e)); } finally { setBusy(false); } };
+  const ask = async (question: string) => { if (!question.trim()) return; setErr(null); setBusy(true);
+    try { const r = await post("/api/ledger/query", { question }); setRes(r); setRows(r.rows); } catch (e) { setErr(errNote(e)); } finally { setBusy(false); } };
   const reset = async () => { setRes(null); setQ(""); setRows(await api("/api/invoices")); };
   const fmtCond = (c: any) => `${c.field.replace("_", " ")} ${({ eq: "=", neq: "≠", gt: ">", gte: "≥", lt: "<", lte: "≤", in: "in", contains: "contains", between: "between" } as any)[c.op] || c.op} ${Array.isArray(c.value) ? c.value.join(", ") : c.value ?? ""}`;
   return (<>
@@ -39,7 +40,7 @@ export default function LedgerPage() {
       </form>
       <div className="ask-chips" aria-label="Example questions">{EXAMPLES.map(x => <Chip key={x} as="button" variant="flat" radius="full" className="chip-btn cursor-pointer h-8 px-1 text-[13px] text-default-700 bg-default-100 hover:bg-default-200 transition-colors" onClick={() => { setQ(x); ask(x); }}>{x}</Chip>)}</div>
       {busy && !res && <Card shadow="none" radius="lg" className="mt-4 bg-default-50"><CardBody className="gap-3 p-5"><Skeleton className="rounded-md h-7 w-48" /><Skeleton className="rounded-md h-4 w-72" /><Skeleton className="rounded-md h-4 w-60" /></CardBody></Card>}
-      {err && <div className="notice err" style={{ marginTop: 12 }}>{err}</div>}
+      <div style={{ marginTop: err ? 12 : 0 }}><Notice note={err} onClose={() => setErr(null)} /></div>
       {res && <Card shadow="sm" radius="lg" className="answer2" aria-live="polite"><CardBody className="gap-1.5 p-5">
         <div className="a-total">{Object.keys(res.summary.totals_by_currency || {}).length
           ? Object.entries(res.summary.totals_by_currency).sort().map(([c, v]: any) => <span key={c}><small>{c}</small> {Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>)

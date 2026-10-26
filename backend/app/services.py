@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 import uuid
 from datetime import datetime, date
 from sqlalchemy import select
@@ -116,10 +117,25 @@ def process_dispute(s: Session, dispute_id: str) -> dict:
     row.invoice_id = inv.id if inv else None; row.client_id = client_id; row.reason = d.get("reason", "")
     row.amount = float(d.get("dispute_amount", {}).get("value", 0)); row.details = d
     s.add(row); s.commit()
-    if client_id:
-        out = run_dispute_agent(d, client_id, row.invoice_id)
-        row.package = {**out["package"], "trace": out["trace"]}; row.status = "package_ready"; s.commit()
+    build_dispute_package(s, row)
     return {"dispute_id": dispute_id, "dispute_status": row.status, "evidence_items": len(row.package.get("timeline", []))}
+
+def build_dispute_package(s: Session, row: Dispute) -> Dispute:
+    """Run the dispute agent on the stored PayPal dispute and attach the defense package."""
+    if row.client_id and row.status != "submitted":
+        out = run_dispute_agent(row.details, row.client_id, row.invoice_id)
+        row.package = {**out["package"], "trace": out["trace"]}; row.status = "package_ready"; s.commit()
+    return row
+
+def build_pending_packages() -> int:
+    """Build packages for disputes still 'received' (e.g. the seeded demo disputes). Safe to call repeatedly."""
+    from .db import SessionLocal
+    n = 0
+    with SessionLocal() as s:
+        for row in s.scalars(select(Dispute).where(Dispute.status == "received")).all():
+            try: build_dispute_package(s, row); n += 1
+            except Exception: logging.getLogger(__name__).exception("dispute package failed for %s", row.paypal_dispute_id); s.rollback()
+    return n
 
 def submit_evidence(s: Session, d: Dispute) -> dict:
     if d.status != "package_ready": raise ValueError(f"dispute is {d.status}")
@@ -152,6 +168,12 @@ def simulate_payment(s: Session, inv: Invoice, kind: str = "INVOICING.INVOICE.PA
 PAID_STATUSES = {"PAID", "MARKED_AS_PAID"}
 CANCELLED_STATUSES = {"CANCELLED"}
 
+def _sync_msg(e: Exception) -> str:
+    from .errors import from_paypal
+    from .paypal import PayPalError
+    ue = from_paypal(e.status if isinstance(e, PayPalError) else 0, "sync with PayPal")
+    return f"{ue.message} {ue.action}"
+
 def sync_with_paypal(s: Session) -> dict:
     """Polling fallback for local/sandbox testing without a public webhook URL.
     Pulls live status of every open invoice and lists disputes; routes changes through the same handlers."""
@@ -162,7 +184,8 @@ def sync_with_paypal(s: Session) -> dict:
         try:
             st = pp.get_invoice(inv.paypal_id).get("status", "")
         except Exception as e:
-            out["errors"].append({"invoice": inv.number, "error": str(e)[:200]}); continue
+            logging.getLogger(__name__).warning("sync: %s failed: %s", inv.number, e)
+            out["errors"].append({"invoice": inv.number, "message": _sync_msg(e)}); continue
         out["checked"] += 1
         if st in PAID_STATUSES:
             n = mark_paid(s, inv); out["paid"].append({"invoice": inv.number, "paypal_status": st, "reminders_cancelled": n})
@@ -174,5 +197,6 @@ def sync_with_paypal(s: Session) -> dict:
             if item["dispute_id"] not in known:
                 out["new_disputes"].append(process_dispute(s, item["dispute_id"]))
     except Exception as e:
-        out["errors"].append({"disputes": str(e)[:200]})
+        logging.getLogger(__name__).warning("sync: dispute list failed: %s", e)
+        out["errors"].append({"disputes": True, "message": _sync_msg(e)})
     return out

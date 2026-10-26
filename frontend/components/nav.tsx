@@ -21,7 +21,7 @@ function SideContent({ path, h, down, counts }: { path: string; h: any; down: bo
         endContent={badge[href] ? <Chip size="sm" variant="flat" radius="sm" className="h-5 min-w-5 text-[11px]">{badge[href]}</Chip> : null}>{label}</ListboxItem>)}
     </Listbox>
     <div className="env">
-      {down ? <Chip variant="bordered" startContent={<span className="dot bad" />} className="env-chip">API offline</Chip> : h ? <>
+      {down ? <Chip variant="bordered" startContent={<span className="dot bad" />} className="env-chip" title="The demo server sleeps when idle and takes about 30 seconds to wake up.">Server waking up…</Chip> : h ? <>
         <Tooltip content={h.paypal_mode === "sandbox" ? "Live PayPal sandbox API" : "Mock PayPal client with sandbox-shaped responses"} placement="right">
           <Chip variant="bordered" startContent={<span className={`dot ${h.paypal_mode === "sandbox" ? "ok" : "warn"}`} />} className="env-chip">PayPal {h.paypal_mode === "sandbox" ? "Sandbox" : "Demo (mock)"}</Chip></Tooltip>
         <Tooltip content={h.llm} placement="right">

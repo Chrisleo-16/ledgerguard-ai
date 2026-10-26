@@ -2,7 +2,7 @@
 import { Flag } from "@/components/flag";
 import { useEffect, useMemo, useState } from "react";
 import { api, post, Invoice, money, feeLabel } from "@/lib/api";
-import { Badge, Kpi, KpiSkeleton, PageHead, DemoPanel, STATUS_LABEL, AiRationale } from "@/components/ui";
+import { Badge, Kpi, KpiSkeleton, PageHead, DemoPanel, STATUS_LABEL, AiRationale, Notice, errNote, type Note } from "@/components/ui";
 import { Button, Card, CardBody, Skeleton } from "@heroui/react";
 import { Icon, IconTile } from "@/components/icons";
 import { AgGridReact, amountFmt, COUNTRY, useIsMobile } from "@/components/grid";
@@ -11,7 +11,7 @@ const OPEN = ["sent", "due_soon", "due", "overdue_3", "overdue_7"];
 export default function InvoicesPage() {
   const [invs, setInvs] = useState<Invoice[]>([]); const [rems, setRems] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]); const [sum, setSum] = useState<any>(null);
-  const [note, setNote] = useState<{ t: string; err?: boolean } | null>(null); const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<Note>(null); const [busy, setBusy] = useState(false);
   const [showNew, setShowNew] = useState(false); const [showAll, setShowAll] = useState(false); const [simId, setSimId] = useState(0);
   const due0 = new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10);
   const [form, setForm] = useState({ client_id: 1, description: "Landing page redesign", amount: 1800, currency: "USD", due_date: due0 });
@@ -19,9 +19,9 @@ export default function InvoicesPage() {
     const [i, r, c, s] = await Promise.all([api("/api/invoices"), api("/api/reminders"), api("/api/clients"), api("/api/summary")]);
     setInvs(i); setRems(r); setClients(c); setSum(s);
   };
-  useEffect(() => { load().catch(e => setNote({ t: String(e), err: true })); }, []);
+  useEffect(() => { load().catch(e => setNote(errNote(e))); }, []);
   const act = async (f: () => Promise<any>, ok: (r: any) => string) => {
-    setBusy(true); try { const r = await f(); setNote({ t: ok(r) }); await load(); } catch (e) { setNote({ t: String(e), err: true }); } finally { setBusy(false); }
+    setBusy(true); try { const r = await f(); setNote({ t: ok(r) }); await load(); } catch (e) { setNote(errNote(e)); } finally { setBusy(false); }
   };
   const invById = useMemo(() => Object.fromEntries(invs.map(i => [i.id, i])), [invs]);
   const openInvs = invs.filter(i => OPEN.includes(i.status));
@@ -48,7 +48,7 @@ export default function InvoicesPage() {
   return (<>
     <PageHead icon="invoices" title="Invoices" sub="Every PayPal invoice, its status, and AI-drafted payment reminders. You approve every reminder before it goes anywhere."
       right={<div className="row">
-        <Button variant="bordered" className="bg-content1 border-default-200" size="md" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.checked} checked, ${r.paid.length} newly paid, ${r.new_disputes.length} new disputes${r.errors.length ? `, ${r.errors.length} errors` : ""}.`)}><Icon n="sync" /> Sync with PayPal</Button>
+        <Button variant="bordered" className="bg-content1 border-default-200" size="md" radius="full" isDisabled={busy} onPress={() => act(() => post("/api/paypal/sync"), r => `Synced with PayPal: ${r.checked} checked, ${r.paid.length} newly paid, ${r.new_disputes.length} new disputes.${r.errors.length ? ` ${r.errors.length} item${r.errors.length > 1 ? "s" : ""} couldn't be checked right now. ${r.errors[0].message}` : ""}`)}><Icon n="sync" /> Sync with PayPal</Button>
         <Button color="primary" size="md" radius="full" onPress={() => setShowNew(!showNew)}>{showNew ? <><Icon n="close" /> Close</> : <><Icon n="add" /> New invoice</>}</Button></div>} />
 
     {!sum && <div className="kpis" aria-busy="true">{[0, 1, 2, 3].map(i => <KpiSkeleton key={i} />)}</div>}
@@ -59,7 +59,7 @@ export default function InvoicesPage() {
       <Kpi label="Open disputes" icon="disputes" kind="warn" totals={sum.open_disputes.totals} foot={`${sum.open_disputes.count} open · ${sum.open_disputes.awaiting_approval} awaiting approval`} part={sum.open_disputes.awaiting_approval} whole={sum.open_disputes.count} />
     </div>}
 
-    {note && <div className={`notice ${note.err ? "err" : ""}`}>{note.t}</div>}
+    <Notice note={note} onClose={() => setNote(null)} />
 
     {showNew && <div className="card"><div className="card-head"><h2><Icon n="invoices" />New invoice</h2><span className="muted">Created and sent with the PayPal Invoicing API v2</span></div>
       <div className="row" style={{ alignItems: "flex-end" }}>

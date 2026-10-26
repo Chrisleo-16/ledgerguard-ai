@@ -1,6 +1,7 @@
 """Seed realistic demo data. Run: python -m app.seed  (wipes and recreates the DB)."""
 from datetime import date, datetime, timedelta
-from .db import Base, engine, SessionLocal, Client, Invoice, Message, Evidence, init_db
+from .db import Base, engine, SessionLocal, Client, Invoice, Message, Evidence, Dispute, init_db
+from .paypal import dispute_resource
 from .evidence_search import get_search
 from sqlalchemy import text
 
@@ -77,10 +78,21 @@ def run():
         Evidence(client_id=A.id, invoice_id=a3.id, kind="delivery", title="Telemetry module delivered",
                  content="Websocket telemetry module delivered with tests, demo video and documentation.", occurred_at=dt(-21)),
     ]
-    s.add_all(ev); s.commit()
+    s.add_all(ev)
+    # Demo disputes: stored in the DB (the source of truth), so they exist on every boot and every worker.
+    # Packages are built afterwards by services.build_pending_packages().
+    seeds = [(b2, "PP-D-SEED0001", "MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED", "The storefront does not match what we agreed in the statement of work."),
+             (h2, "PP-D-SEED0002", "MERCHANDISE_OR_SERVICE_NOT_RECEIVED", "We never received the inventory sync feature.")]
+    for x, did, reason, msg in seeds:
+        c = next(cl for cl in clients if cl.id == x.client_id)
+        s.add(Dispute(paypal_dispute_id=did, invoice_id=x.id, client_id=c.id, reason=reason, amount=x.amount, status="received",
+                      details=dispute_resource(did, x.number, x.amount, x.currency, reason, c.email, c.name, [msg])))
+    s.commit()
     for e in ev: get_search().index(e)
     s.close()
-    print(f"Seeded {len(clients)} clients, {len(inv)} invoices, {len(msgs)} messages, {len(ev)} evidence docs.")
+    print(f"Seeded {len(clients)} clients, {len(inv)} invoices, {len(msgs)} messages, {len(ev)} evidence docs, {len(seeds)} disputes.")
 
 if __name__ == "__main__":
     run()
+    from .services import build_pending_packages
+    build_pending_packages()

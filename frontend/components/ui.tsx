@@ -2,6 +2,9 @@
 import { ReactNode } from "react";
 import { Accordion, AccordionItem, Card, CardBody, Chip, Progress, Skeleton } from "@heroui/react";
 import { Icon, IcName } from "@/components/icons";
+import { Alert } from "@heroui/react";
+import { useState } from "react";
+import { toUserErr, type UserErr } from "@/lib/api";
 export const STATUS_LABEL: Record<string, string> = { draft: "Draft", sent: "Sent", due_soon: "Due soon", due: "Due", overdue_3: "Overdue 3d+",
   overdue_7: "Overdue 7d+", paid: "Paid", cancelled: "Cancelled", superseded: "Superseded", approved: "Approved",
   received: "Received", package_ready: "Awaiting your approval", submitted: "Evidence submitted", no_action: "No action needed",
@@ -52,3 +55,24 @@ export function AiRationale({ r }: { r: any }) {
     {r.guardrail_notes?.length > 0 && <div className="guard"><Icon n="disputes" size={13} /> Guardrails applied: {r.guardrail_notes.join("; ")}</div>}
   </div>;
 }
+
+/** Status / error banner (HeroUI Alert). Errors read as what happened, why, and what to do next;
+ * technical details sit behind an optional "Details" toggle. Always dismissible. */
+export type Note = { t: string; err?: boolean; info?: UserErr } | null;
+export function Notice({ note, onClose }: { note: Note; onClose: () => void }) {
+  const [open, setOpen] = useState(false);
+  if (!note) return null;
+  const i = note.info;
+  return <Alert role={note.err ? "alert" : "status"} hideIcon isClosable onClose={onClose}
+    classNames={{ base: `notice notice-x ${note.err ? "err" : ""}`, mainWrapper: "notice-main", title: "notice-title", description: "notice-desc",
+      closeButton: "notice-close" }}
+    closeButtonProps={{ "aria-label": "Dismiss message" } as any}
+    title={i ? i.title : note.t}
+    description={i ? <>
+      <span>{i.message} <strong>{i.action}</strong></span>
+      {i.debug && <><button type="button" className="notice-more" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Hide details" : "Details"}</button>
+        {open && <code className="notice-debug">{i.code}: {i.debug}</code>}</>}
+    </> : undefined} />;
+}
+
+export const errNote = (e: unknown): Note => { const info = toUserErr(e); return { t: info.title, err: true, info }; };

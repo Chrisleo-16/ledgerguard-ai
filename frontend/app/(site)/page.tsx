@@ -6,6 +6,7 @@ import { Icon, IcName } from "@/components/icons";
 import { Accordion, AccordionItem, Button, Chip } from "@heroui/react";
 import { GITHUB } from "@/components/site";
 import { InstallAppButton } from "@/components/download-button";
+import { WorkflowCarousel } from "@/components/workflow-carousel";
 /* Every figure below comes from the seeded demo data the live app shows (backend/app/seed.py). Nothing is invented. */
 
 const Chipi = ({ n }: { n: IcName }) => <span className="ichip" aria-hidden="true"><Icon n={n} size={18} /></span>;
@@ -135,12 +136,8 @@ export default function Landing() {
     {/* 5 tiles */}
     <section className="v-multi" id="workflows">
       <div className="v-wrap"><h2 className="v-h2 c">Multiple Workflows &amp; APIs</h2><p className="v-p c">Three workflows built on PayPal APIs, so you can chase, defend and ask from one place.</p></div>
-      {/* Arrow-corner cards adapted from Uiverse.io by satyamchaudharydev (MIT) */}
-      <ul className="v-tiles" aria-label="Workflows and APIs">{TILES.map(([t, c, m, href], i) => <li key={t}>
-        <Link href={href} className={`v-acard ${i === 1 ? "on" : ""}`}>
-          <span className="v-acard-t">{t}</span><span className="v-acard-c">{c}</span><span className="v-acard-m">{m}</span>
-          <span className="v-acard-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M13.2 5.3a1 1 0 0 1 1.4 0l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 1 1-1.4-1.4l4.3-4.3H4a1 1 0 1 1 0-2h13.5l-4.3-4.3a1 1 0 0 1 0-1.4z"/></svg></span>
-        </Link></li>)}</ul>
+      {/* Arrow-corner cards adapted from Uiverse.io by satyamchaudharydev (MIT), in a themed carousel */}
+      <WorkflowCarousel tiles={TILES} />
     </section>
 
     {/* 6 FAQ */}

@@ -188,3 +188,27 @@ html{scroll-padding-top:84px}
 .v-acard:focus-visible{outline:2px solid #111;outline-offset:3px}
 .v-acard.on{box-shadow:0 0 0 2px #c6f432,0 0 0 3px #1a1a1a,0 18px 36px -16px rgba(0,0,0,.35);transform:translateY(-6px)}
 @media (prefers-reduced-motion:reduce){.v-acard,.v-acard-arrow,.v-acard-arrow svg{transition:none}}
+
+/* v15: workflow carousel shell (cards keep the Uiverse arrow-corner look) */
+.v-car{position:relative;width:100%;max-width:1180px;margin:0 auto;padding:0 24px;box-sizing:border-box;min-width:0}
+.v-car-view{width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;touch-action:pan-x;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.v-car-view::-webkit-scrollbar{display:none}
+.v-car .v-tiles{display:flex;gap:12px;list-style:none;margin:0;padding:28px 0 12px;width:max-content;max-width:none;align-items:stretch;overflow:visible;justify-content:flex-start;scroll-snap-type:none}
+.v-car .v-tiles>li{flex:none;display:flex;scroll-snap-align:start}
+.v-car .v-acard{width:100%;min-height:150px}
+.v-car-bar{display:flex;align-items:center;justify-content:center;gap:14px;padding:4px 0 8px}
+.v-car-btn{width:42px;height:42px;border-radius:999px;border:0;background:#111;color:#c6f432;box-shadow:0 0 0 2px #c6f432;display:inline-grid;place-items:center;cursor:pointer;transition:background .2s,color .2s,transform .15s,opacity .2s}
+.v-car-btn:hover:not(:disabled),.v-car-btn:focus-visible:not(:disabled){background:#c6f432;color:#111;outline:none}
+.v-car-btn:focus-visible{box-shadow:0 0 0 2px #c6f432,0 0 0 4px #111}
+.v-car-btn:active:not(:disabled){transform:scale(.95)}
+.v-car-btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:0 0 0 2px #bbb;color:#bbb;background:#333}
+.v-car-dots{display:flex;gap:8px;align-items:center}
+.v-car-dot{width:8px;height:8px;padding:0;border:0;border-radius:999px;background:#c8c8c8;cursor:pointer;transition:background .2s,width .2s}
+.v-car-dot.on{background:#111;width:22px}
+.v-car-dot:focus-visible{outline:2px solid #111;outline-offset:3px}
+.v-car-view:focus-visible{outline:2px solid #111;outline-offset:4px;border-radius:12px}
+@media (max-width:640px){.v-car{padding:0 16px}}
+@media (prefers-reduced-motion:reduce){.v-car-btn,.v-car-dot{transition:none}.v-car-view{scroll-behavior:auto}}
+
+.v-multi{overflow-x:clip;min-width:0}
+.v-multi .v-wrap{min-width:0}

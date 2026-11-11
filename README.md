@@ -21,7 +21,30 @@ Other tools either chase invoices or fight disputes. LedgerGuard is the only one
 - Landing: https://ledgerguard-web.onrender.com · Demo app: https://ledgerguard-web.onrender.com/app · API: https://ledgerguard-api-i7i3.onrender.com (OpenAPI docs at `/docs`).
 - No login needed. `/login` is a demo screen; "Continue to demo" opens the app.
 - Both services run on Render's free plan and sleep when idle. The first request can take about a minute while they wake; reload if the app shows "API offline".
+- The hosted demo runs in PayPal Sandbox mode. The sidebar shows **PayPal Sandbox**.
 - The demo uses SQLite on an ephemeral disk and re-seeds its demo data on every boot, so changes you make are reset after a restart.
+- Step-by-step test instructions are in [How to test it (judges)](#how-to-test-it-judges) below.
+
+## How to test it (judges)
+
+The hosted demo runs on Render's free plan. The first request can take about a minute while the services wake. Demo data resets when the service restarts, so invoices you create may disappear after a restart.
+
+### A. Quick test (no PayPal account needed)
+
+1. Open https://ledgerguard-web.onrender.com/app. Wait up to a minute if the service is waking, and reload if the app shows "API offline".
+2. On an overdue invoice, click **Draft reminder** and read the reasoning beside the draft.
+3. Open **Disputes** and look at a defense package with cited evidence. You do not need to submit it.
+4. Open **Ask the ledger**, ask `past-due invoices over $1000`, and check that the table and the summary match the question.
+5. Under **Demo controls**, move the clock forward and watch invoice statuses change.
+
+### B. Full PayPal sandbox payment test (needs a free PayPal developer account)
+
+1. Confirm the sidebar shows **PayPal Sandbox**.
+2. Click **New invoice**, pick any client, enter a small amount such as 50 USD, then create and send it. LedgerGuard creates and sends a real PayPal sandbox invoice.
+3. Copy the PayPal invoice id from the success toast. The toast reads like `Invoice LG-… created and sent (PayPal INV2-…)`. The invoice table shows only the LedgerGuard number (for example LG-2026-1016-04EB), not the PayPal INV2 id, so copy the INV2 id from the toast before it disappears (it stays for a few seconds).
+4. Open the pay link `https://www.sandbox.paypal.com/invoice/p/#<INV2 id>`, replacing `<INV2 id>` with the id you copied.
+5. Sign in with a sandbox **Personal** account and pay the invoice. You can create a Personal sandbox account for free in the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/accounts) under **Testing Tools > Sandbox Accounts**. Anyone with a Personal sandbox account can pay the invoice; you do not need the app owner's Business sandbox login.
+6. Back in LedgerGuard, click **Sync with PayPal**. The invoice should turn Paid.
 
 ## Behaviour
 
@@ -192,10 +215,12 @@ Deploy: Render → New → Blueprint. `render.yaml` creates `ledgerguard-api` an
 
 - Login is a demo screen only: no accounts, no passwords. The PWA caches the app shell, never API data, so offline it shows the shell without live numbers.
 - Webhooks against a public URL: not yet exercised end to end. Sync polling is the tested path.
-- Real buyer payment and live disputes in the sandbox: untested.
+- Buyer payment of an invoice in the PayPal sandbox is verified (see below). Live disputes in the sandbox remain untested.
 - Docker (`docker compose up --build`) and Postgres via `DATABASE_URL`: untested.
 - Render free plan uses SQLite on an ephemeral disk; the demo re-seeds on every boot.
 - Seeded invoices carry synthetic PayPal ids; live sandbox calls need new invoices.
+
+**Verified live.** On 11 Nov 2026 the hosted app ran in PayPal Sandbox mode (the sidebar shows **PayPal Sandbox**). It created and sent invoice LG-2026-1016-04EB (PayPal INV2-GRCS-7EKA-KPLM-47R3, GBP 25,000). A sandbox personal buyer paid it on PayPal's pay page, and LedgerGuard detected the payment and marked the invoice Paid.
 
 ## Docs
 

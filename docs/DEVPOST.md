@@ -14,12 +14,19 @@
 
 ---
 
+## How it works, in plain words
+
+A freelancer creates an invoice in LedgerGuard, which creates and sends a real PayPal invoice through the PayPal Invoicing API. The client pays on PayPal's own page, not inside LedgerGuard. PayPal can notify LedgerGuard by webhook, or the freelancer can click Sync with PayPal; either way the invoice turns Paid and any pending reminder drafts are cancelled. If the client is late, Claude reads the invoice context and drafts a reminder, which the freelancer reviews, approves, and then sends themselves. If the client opens a dispute, LedgerGuard gathers evidence from the invoice trail and drafts a defense that cites its sources. That defense goes to PayPal only after the freelancer approves and confirms. The freelancer can also ask questions in plain English; the model turns the question into a filter, and code computes the exact numbers.
+
 ## Judge access
 
 - Landing: https://ledgerguard-web.onrender.com · Demo app: https://ledgerguard-web.onrender.com/app · API: https://ledgerguard-api-i7i3.onrender.com (OpenAPI docs at `/docs`).
 - No login needed. `/login` is a demo screen; "Continue to demo" opens the app.
 - Both services run on Render's free plan and sleep when idle. The first request can take about a minute while they wake; reload if the app shows "API offline".
+- The hosted demo runs in **PayPal Sandbox** mode. Judges will see **PayPal Sandbox** in the sidebar, not Demo (mock).
 - The demo uses SQLite on an ephemeral disk and re-seeds its demo data on every boot, so changes you make are reset after a restart.
+- **Verified live:** On 11 Nov 2026 the hosted app ran in PayPal Sandbox mode, created and sent invoice LG-2026-1016-04EB (PayPal INV2-GRCS-7EKA-KPLM-47R3, GBP 25,000). A sandbox personal buyer paid it on PayPal's pay page, and LedgerGuard detected the payment and marked the invoice Paid.
+- Step-by-step test instructions, including a quick test with no PayPal account and a full sandbox payment test, are in the README under [How to test it (judges)](https://github.com/Chrisleo-16/ledgerguard-ai#how-to-test-it-judges).
 
 ## Why LedgerGuard (positioning)
 
@@ -27,19 +34,19 @@ Other tools either chase invoices or fight disputes. LedgerGuard is the only one
 
 1. **All three jobs in one PayPal-native app:** invoice chasing, dispute defense and a conversational ledger share one invoice ledger, so nothing is copied between tools.
 2. **Dispute evidence built from the invoice and reminder history, not just order data.** The defense draws on the signed scope, milestones, deliveries, every reminder sent and the client's replies, and each claim cites its source.
-3. **Guardrails enforced in code, made for cross-border freelancers.** Late-fee caps, exact per-currency totals and human approval before anything reaches PayPal are rules in code, not prompts. It's built for freelancers in markets like Kenya who are paid from abroad.
+3. **Guardrails enforced in code, made for cross-border freelancers.** Late-fee caps, exact per-currency totals and human approval before anything reaches PayPal are rules in code, not prompts. It is built for freelancers in markets like Kenya who are paid from abroad.
 
 ## Inspiration
 
-I'm a freelance developer in Nairobi, and most of the people who pay me are in the US and Europe. For a freelancer or a two-person agency in Kenya, money tied up in an unpaid invoice is often money you need this month. Three problems keep coming back:
+I am a freelance developer in Nairobi, and most of the people who pay me are in the US and Europe. For a freelancer or a two-person agency in Kenya, money tied up in an unpaid invoice is often money you need this month. Three problems keep coming back:
 
-1. **Late payments.** You send the invoice, the due date passes, and you have to decide how hard to push. If you're too soft you don't get paid. If you're too harsh you can lose a good client. Writing the right email for a formal German finance team is different from writing one for a friendly UK design studio.
-2. **Chargebacks and disputes.** A buyer says the work "wasn't as described", and you have a deadline to reply. The proof (signed scope, milestone approvals, delivery notes, the client's "looks great!") is spread across email, chat and repos. While the dispute is open, that money is frozen.
+1. **Late payments.** You send the invoice, the due date passes, and you have to decide how hard to push. If you are too soft you do not get paid. If you are too harsh you can lose a good client. Writing the right email for a formal German finance team is different from writing one for a friendly UK design studio.
+2. **Chargebacks and disputes.** A buyer says the work "was not as described", and you have a deadline to reply. The proof (signed scope, milestone approvals, delivery notes, the client's "looks great!") is spread across email, chat and repos. While the dispute is open, that money is frozen.
 3. **No clear picture.** "Which invoices over $1,000 are past due?" should take seconds to answer. A small business usually has no analyst to ask, and a chatbot that guesses the numbers is worse than no answer.
 
 PayPal already offers the right primitives: Invoicing, Webhooks and Disputes. LedgerGuard AI puts an agentic layer over them, sized for one freelancer, with a hard rule that **the AI drafts and the human decides**.
 
-*Side story:* While building the PayPal client, webhook handling and mock layer, I noticed that most of that plumbing (OAuth, retries, idempotency, signature checks, a mock that behaves like the sandbox) is what every developer here has to rebuild. It could be packaged as an easy PayPal connector for African developers. That's an idea for later, not part of this submission. See *What's next*.
+*Side story:* While building the PayPal client, webhook handling and mock layer, I noticed that most of that plumbing (OAuth, retries, idempotency, signature checks, a mock that behaves like the sandbox) is what every developer here has to rebuild. It could be packaged as an easy PayPal connector for African developers. That is an idea for later, not part of this submission. See *What is next*.
 
 ## What it does
 
@@ -75,10 +82,10 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 - The **AG Grid** table updates to show the matching rows. The **summary sentence** (count, totals per currency, number past due, maximum days late, clients) is **computed exactly from those rows in code**. The LLM never writes a number in it. The filter that was applied appears as badges, so you can see how your question was read.
 
 ### Also built in
-- **Current UI:** a sticky nav that tracks the section you're on; plain-language status toasts (success, loading, warning, error) that say what happened and what to do next, with technical details behind a **Details** toggle; an installable PWA with an **Install app** button that uses the browser's install prompt and explains *Share → Add to Home Screen* on iOS; and two seeded demo disputes, so the Disputes page is ready on first load.
+- **Current UI:** a sticky nav that tracks the section you are on; plain-language status toasts (success, loading, warning, error) that say what happened and what to do next, with technical details behind a **Details** toggle; an installable PWA with an **Install app** button that uses the browser's install prompt and explains *Share → Add to Home Screen* on iOS; and two seeded demo disputes, so the Disputes page is ready on first load.
 - A dashboard with KPI cards: outstanding, overdue, paid this month and open disputes, each totalled per currency from the stored data.
 - **Demo controls** for judges: a dev clock (+1, +3 or +7 days) to watch invoices change state, plus simulated payment and dispute webhooks that go through the real webhook handler in mock mode.
-- The sidebar shows whether PayPal is running in **Sandbox or Demo (mock)** mode and whether a **model or the rules fallback** is active, so the demo always shows which mode it's in.
+- The sidebar shows whether PayPal is running in **Sandbox or Demo (mock)** mode and whether a **model or the rules fallback** is active, so the demo always shows which mode it is in.
 
 ## How we built it
 
@@ -89,7 +96,7 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 - `state_machine.py` holds the invoice lifecycle as pure functions, which makes it easy to test.
 - `agents.py` contains the two LangGraph `StateGraph`s. Each node records itself in a trace, and the UI shows that trace.
 - `filters.py` contains the FilterSpec schema, the validator, the deterministic parser, currency enforcement, and the exact summarizer.
-- `evidence_search.py` defines an `EvidenceSearch` interface with SQLite FTS5 and Postgres full-text implementations. It's built so a hybrid search backend can be swapped in later.
+- `evidence_search.py` defines an `EvidenceSearch` interface with SQLite FTS5 and Postgres full-text implementations. It is built so a hybrid search backend can be swapped in later.
 - `llm.py` picks a provider automatically: with `ANTHROPIC_API_KEY` it calls Claude through the official Anthropic SDK using tool-use structured output; optionally, with `OPENAI_API_KEY` instead, any OpenAI-compatible endpoint in JSON mode; with no key, nothing. If a call fails or no key is set it returns `None`, and every caller has a deterministic fallback, so the app works with no model at all.
 - Webhooks: `POST /api/webhooks/paypal` verifies the signature, **de-duplicates by event ID**, then routes `INVOICING.INVOICE.PAID`, `PAYMENT.CAPTURE.COMPLETED` and `CUSTOMER.DISPUTE.CREATED`.
 - Database: SQLite by default. Setting `DATABASE_URL` switches to Postgres (for example Supabase). The demo runs on SQLite.
@@ -138,6 +145,7 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 
 **During development**
 - **Cursor** and **Grok Bot** (AI coding assistants) were used while building the code and docs.
+- **ElevenLabs** (voices for the demo video), **Google Flow with Veo** (video shots for the demo video) and **Higgsfield** (character and mascot images for the demo video).
 - **Claude** is the model used at runtime inside the product (see above); it is not used to compute any amounts.
 
 ## Challenges we ran into
@@ -150,7 +158,7 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 - **Sandbox details.** PayPal invoice numbers must be unique per account and survive local database reseeds, so sandbox numbers get a random suffix. Leaving the invoicer email blank lets PayPal use the REST app's business account.
 - **Retries without double side effects.** Exponential backoff plus `PayPal-Request-Id` handles retries, webhook de-duplication by event ID handles redelivered events, and a server-side guard stops dispute evidence from being submitted twice.
 
-## Accomplishments that we're proud of
+## Accomplishments that we are proud of
 
 - **Human-in-the-loop is enforced in code, not just promised.** The reminder approve endpoint cannot send email, and `provide-evidence` is reachable only through the explicit approval endpoint.
 - A dispute defense that **cites its sources**: every claim in the statement points to an evidence ID shown in the timeline.
@@ -160,19 +168,19 @@ LedgerGuard AI is a web app with three workflows. All three run against the PayP
 
 ## What we learned
 
-- Agentic doesn't have to mean autonomous. The most useful setup was agents that **gather, reason and draft**, with explicit graphs and visible traces, and a person who **decides**.
+- Agentic does not have to mean autonomous. The most useful setup was agents that **gather, reason and draft**, with explicit graphs and visible traces, and a person who **decides**.
 - Put structure between the LLM and anything that matters: JSON specs, allow-lists, deterministic fallbacks and exact computation.
 - How PayPal's Invoicing, Disputes and Webhooks APIs fit together, and the operational details that matter: OAuth token lifetimes, idempotency keys, signature verification, and how disputes link back to invoices through `disputed_transactions`.
-- Designing for a solo freelancer means fewer screens and clearer states. Every page says what will happen and what won't happen without your approval.
+- Designing for a solo freelancer means fewer screens and clearer states. Every page says what will happen and what will not happen without your approval.
 
-## What's next (planned, not yet built)
+## What is next (planned, not yet built)
 
 - **Hybrid evidence search** (keyword plus semantic, for example Elastic) behind the existing `EvidenceSearch` interface.
 - **Evidence ingestion and file attachments:** uploading contracts and delivery PDFs, and attaching them to `provide-evidence` (the client already accepts files, but the app does not upload any yet).
 - **More dispute lifecycle events** (updates, resolution) and response-deadline alerts.
 - **Accounts and multi-tenancy:** today the app is single-user; `/login` is a demo screen with no real authentication.
 - **Optional one-click sending** of approved reminders through the user's own email, still behind explicit approval.
-- A **hosted deployment** on Postgres/Supabase.
+- **Move the hosted demo from SQLite to Postgres/Supabase** so data persists.
 - **Side project:** packaging the PayPal layer (OAuth, retries, idempotency, webhook verification, a mock that behaves like the sandbox) as an easy connector for African developers building on PayPal.
 
 ## Built with

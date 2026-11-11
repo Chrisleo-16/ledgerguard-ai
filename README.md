@@ -6,7 +6,7 @@ An agentic PayPal copilot for freelancers and cross-border micro-SMEs. It chases
 
 Built by Chrisben Evans Leo (Nairobi) for the PayPal AI Hackathon, 2026. Built during the hackathon submission period (October 2026). Live demo: https://ledgerguard-web.onrender.com (app at [/app](https://ledgerguard-web.onrender.com/app)). API: https://ledgerguard-api-i7i3.onrender.com. Code: https://github.com/Chrisleo-16/ledgerguard-ai. Video: https://youtu.be/8JtWZxMUFTk.
 
-![LedgerGuard AI invoice chaser home screen](docs/readme/screens/home.png)
+![LedgerGuard AI invoices dashboard](docs/readme/screens/home.jpg)
 
 ## Why LedgerGuard
 
@@ -173,29 +173,31 @@ flowchart TB
 
 ## Screens
 
-Landing page with the three workflows and an Install app button (the app is an installable PWA):
+These screenshots were taken from the live demo at https://ledgerguard-web.onrender.com on 11 November 2026.
 
-![Landing page](docs/readme/screens/landing.png)
+Landing page. Get Started opens the demo; no account is required:
+
+![Landing page](docs/readme/screens/landing.jpg)
 
 How the AI works: what Claude decides and what code enforces:
 
-![How the AI works](docs/readme/screens/how-it-works.png)
+![How the AI works](docs/readme/screens/how-it-works.jpg)
 
-Demo login. No real authentication and no passwords; "Continue to demo" opens `/app`:
+Invoice dashboard with outstanding, overdue, paid and dispute totals, plus the live invoice grid:
 
-![Demo login](docs/readme/screens/login.png)
+![Invoices dashboard](docs/readme/screens/home.jpg)
 
-Invoice chaser with agent drafts, decision, rationale, and guardrail notes:
+Invoice grid and reminder drafts. Claude can recommend waiting, and you approve every reminder before it is sent:
 
-![Reminder drafts with AI decision and guardrails](docs/readme/screens/drafts.png)
+![Invoice grid and reminder drafts](docs/readme/screens/drafts.jpg)
 
-Dispute defense with ranked evidence and timeline:
+Dispute defense with an evidence timeline and Claude's cited review, waiting for your approval:
 
-![Dispute defense package](docs/readme/screens/disputes.png)
+![Dispute defense package](docs/readme/screens/disputes.jpg)
 
-Ledger question, validated spec, and exact summary:
+Ask the ledger: a plain-English question, a checked filter, and the exact matching invoices:
 
-![Conversational ledger query](docs/readme/screens/ledger-query.png)
+![Ask the ledger](docs/readme/screens/ledger-query.jpg)
 
 ## Local
 

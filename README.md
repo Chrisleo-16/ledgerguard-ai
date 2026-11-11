@@ -46,6 +46,48 @@ The hosted demo runs on Render's free plan. The first request can take about a m
 5. Sign in with a sandbox **Personal** account and pay the invoice. You can create a Personal sandbox account for free in the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/accounts) under **Testing Tools > Sandbox Accounts**. Anyone with a Personal sandbox account can pay the invoice; you do not need the app owner's Business sandbox login.
 6. Back in LedgerGuard, click **Sync with PayPal**. The invoice should turn Paid.
 
+A walkthrough with screenshots of a real sandbox payment is in [Proof: a real PayPal sandbox payment](#proof-a-real-paypal-sandbox-payment).
+
+## Proof: a real PayPal sandbox payment
+
+On 11 Nov 2026 the hosted app in PayPal Sandbox mode created and sent this invoice, a sandbox buyer paid it on PayPal's own page, and LedgerGuard marked it Paid after Sync with PayPal.
+
+1. LedgerGuard, running in PayPal Sandbox mode, created and sent invoice LG-2026-1017-56AD for EUR 18,000 to Harbor & Pine, and the toast shows PayPal invoice INV2-ZTWF-CPQH-YLWP-JAEC.
+
+![1. LedgerGuard creates and sends invoice LG-2026-1017-56AD in PayPal Sandbox mode](docs/proof/sandbox-payment/01-invoice-created.png)
+
+2. The PayPal sandbox pay page for that invoice shows EUR 18,000 due.
+
+![2. PayPal sandbox pay page with EUR 18,000 due](docs/proof/sandbox-payment/02-paypal-pay-page.png)
+
+3. The buyer signs in to PayPal as a sandbox personal account.
+
+![3. PayPal login for the sandbox personal buyer, with the account email redacted](docs/proof/sandbox-payment/03-paypal-login.png)
+
+4. The PayPal checkout asks the buyer to complete the purchase of EUR 18,000.
+
+![4. PayPal checkout Complete Purchase for EUR 18,000](docs/proof/sandbox-payment/04-complete-purchase.png)
+
+5. PayPal shows a processing screen that reads "Thanks for using PayPal".
+
+![5. PayPal processing screen: Thanks for using PayPal](docs/proof/sandbox-payment/05-processing.png)
+
+6. PayPal confirms the payment was successful and that the buyer paid EUR 18,000.00.
+
+![6. Payment successful: you paid EUR 18,000.00](docs/proof/sandbox-payment/06-payment-successful.png)
+
+7. The same invoice page now shows Paid, with EUR 0.00 due.
+
+![7. PayPal invoice page now Paid, EUR 0.00 due](docs/proof/sandbox-payment/07-invoice-now-paid.png)
+
+8. The PayPal business Invoicing list shows both LG-2026-1017-56AD and LG-2026-1016-04EB as Paid.
+
+![8. PayPal Invoicing list with both sandbox invoices marked Paid](docs/proof/sandbox-payment/08-invoicing-list-paid.png)
+
+9. After Sync with PayPal, LedgerGuard marks LG-2026-1017-56AD as Paid, and Paid this month shows EUR 18,000 and GBP 25,000.
+
+![9. LedgerGuard after Sync: LG-2026-1017-56AD Paid, Paid this month EUR 18,000 and GBP 25,000](docs/proof/sandbox-payment/09-ledgerguard-paid.png)
+
 ## Behaviour
 
 Three workflows share one invoice ledger.
@@ -220,7 +262,7 @@ Deploy: Render → New → Blueprint. `render.yaml` creates `ledgerguard-api` an
 - Render free plan uses SQLite on an ephemeral disk; the demo re-seeds on every boot.
 - Seeded invoices carry synthetic PayPal ids; live sandbox calls need new invoices.
 
-**Verified live.** On 11 Nov 2026 the hosted app ran in PayPal Sandbox mode (the sidebar shows **PayPal Sandbox**). It created and sent invoice LG-2026-1016-04EB (PayPal INV2-GRCS-7EKA-KPLM-47R3, GBP 25,000). A sandbox personal buyer paid it on PayPal's pay page, and LedgerGuard detected the payment and marked the invoice Paid.
+**Verified live.** On 11 Nov 2026 the hosted app ran in PayPal Sandbox mode (the sidebar shows **PayPal Sandbox**). A sandbox personal buyer paid two invoices on PayPal's own page, and LedgerGuard marked both Paid after Sync with PayPal: LG-2026-1016-04EB (PayPal INV2-GRCS-7EKA-KPLM-47R3, GBP 25,000) and LG-2026-1017-56AD (PayPal INV2-ZTWF-CPQH-YLWP-JAEC, EUR 18,000). Screenshots of the second payment are in [Proof: a real PayPal sandbox payment](#proof-a-real-paypal-sandbox-payment).
 
 ## Docs
 

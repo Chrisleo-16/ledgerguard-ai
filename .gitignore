@@ -26,6 +26,10 @@ ui-shots/
 *.png
 *.jpg
 *.jpeg
+# tracked product and proof images
+!docs/**/*.png
+!docs/**/*.jpg
+!frontend/public/**/*.png
 # misc
 .DS_Store
 *.log

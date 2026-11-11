@@ -25,7 +25,7 @@ A freelancer creates an invoice in LedgerGuard, which creates and sends a real P
 - Both services run on Render's free plan and sleep when idle. The first request can take about a minute while they wake; reload if the app shows "API offline".
 - The hosted demo runs in **PayPal Sandbox** mode. Judges will see **PayPal Sandbox** in the sidebar, not Demo (mock).
 - The demo uses SQLite on an ephemeral disk and re-seeds its demo data on every boot, so changes you make are reset after a restart.
-- **Verified live:** On 11 Nov 2026 the hosted app ran in PayPal Sandbox mode, created and sent invoice LG-2026-1016-04EB (PayPal INV2-GRCS-7EKA-KPLM-47R3, GBP 25,000). A sandbox personal buyer paid it on PayPal's pay page, and LedgerGuard detected the payment and marked the invoice Paid.
+- **Verified live:** On 11 Nov 2026 the hosted app ran in PayPal Sandbox mode. A sandbox personal buyer paid two invoices on PayPal's own page, and LedgerGuard marked both Paid after Sync with PayPal: LG-2026-1016-04EB (PayPal INV2-GRCS-7EKA-KPLM-47R3, GBP 25,000) and LG-2026-1017-56AD (PayPal INV2-ZTWF-CPQH-YLWP-JAEC, EUR 18,000). Screenshots of the second payment are in the README under [Proof: a real PayPal sandbox payment](https://github.com/Chrisleo-16/ledgerguard-ai#proof-a-real-paypal-sandbox-payment).
 - Step-by-step test instructions, including a quick test with no PayPal account and a full sandbox payment test, are in the README under [How to test it (judges)](https://github.com/Chrisleo-16/ledgerguard-ai#how-to-test-it-judges).
 
 ## Why LedgerGuard (positioning)

@@ -1,7 +1,7 @@
 # LedgerGuard AI: demo video script (about 2:40)
 
 **Presenter / author:** Chrisben Evans Leo · **Target length:** about 2:40 (under 3:00) · **Voiceover:** 336 words, about 2:15 spoken at 150 wpm, with the rest of the time for on-screen action
-**Upload to:** `[YOUTUBE_URL]` · **Links on the end card:** https://ledgerguard-web.onrender.com, https://github.com/Chrisleo-16/ledgerguard-ai
+**Upload to:** https://youtu.be/8JtWZxMUFTk · **Links on the end card:** https://ledgerguard-web.onrender.com, https://github.com/Chrisleo-16/ledgerguard-ai
 
 > **Trademark rule:** the video and voiceover name no competitor and no third-party product or brand other than PayPal. Keep it that way when editing, and keep library, model and tool names out of the narration and on-screen text. The positioning compares against "other tools" in general.
 

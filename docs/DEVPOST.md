@@ -7,7 +7,7 @@
 | **Author** | Chrisben Evans Leo, second-year Data Science student and full-stack developer, Nairobi, Kenya |
 | **Live demo** | https://ledgerguard-web.onrender.com (landing) · https://ledgerguard-web.onrender.com/app (demo app) · API https://ledgerguard-api-i7i3.onrender.com |
 | **Source code** | https://github.com/Chrisleo-16/ledgerguard-ai |
-| **Demo video** | `[YOUTUBE_URL]` |
+| **Demo video** | https://youtu.be/8JtWZxMUFTk |
 | **AI model** | Claude `claude-sonnet-5-5` via the Anthropic Python SDK (`LLM_MODEL` overrides it) |
 | **License** | MIT |
 | **Built** | During the submission period, October 2026 |

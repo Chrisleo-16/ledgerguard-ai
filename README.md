@@ -4,7 +4,7 @@
 
 An agentic PayPal copilot for freelancers and cross-border micro-SMEs. It chases late invoices, builds chargeback defenses, and answers "who owes me what?" in plain language. The model proposes; code bounds it; a human approves every step that leaves the app.
 
-Built by Chrisben Evans Leo (Nairobi) for the PayPal AI Hackathon, 2026. Built during the hackathon submission period (October 2026). Live demo: https://ledgerguard-web.onrender.com (app at [/app](https://ledgerguard-web.onrender.com/app)). API: https://ledgerguard-api-i7i3.onrender.com. Code: https://github.com/Chrisleo-16/ledgerguard-ai. Video: [YOUTUBE_URL].
+Built by Chrisben Evans Leo (Nairobi) for the PayPal AI Hackathon, 2026. Built during the hackathon submission period (October 2026). Live demo: https://ledgerguard-web.onrender.com (app at [/app](https://ledgerguard-web.onrender.com/app)). API: https://ledgerguard-api-i7i3.onrender.com. Code: https://github.com/Chrisleo-16/ledgerguard-ai. Video: https://youtu.be/8JtWZxMUFTk.
 
 ![LedgerGuard AI invoice chaser home screen](docs/readme/screens/home.png)
 
